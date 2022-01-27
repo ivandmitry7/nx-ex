@@ -1,12 +1,35 @@
 package main
 
 import (
-	"github.com/o-kos/nx-ex/cmd"
+	"fmt"
+	"github.com/docopt/docopt-go"
 	"os"
+
+	"github.com/o-kos/nx-ex/internal/task"
 )
 
 func main() {
-	if err := cmd.Execute(); err != nil {
+	usage := `NAVTEX alert exercise messages extractor.
+Usage:
+  nxex [-vqr] [--config=NAME] [--out-dir=DIR] [--out-fmt=FMT] <MASK>
+  nxex --version
+  nxex -h | --help
+Arguments:
+  MASK source files name mask
+Options:
+  -h --help              show this help message and exit
+  --version              show version and exit
+  -v --verbose           print status messages
+  -q --quiet             report only file names
+  -r --recursive         recursive process nested directories
+  -c NAME --config=NAME  config file name with parsing rules [default: ./nx-ex.yml]
+  --out-dir=DIR          dir for save JSON results [default: ./]
+  --out-fmt=FMT          template for out JSON file name [default: *+.json]`
+
+	arguments, _ := docopt.ParseArgs(usage, nil, "0.0.1")
+	tsk := task.NewTask()
+	if err := tsk.Execute(arguments); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
