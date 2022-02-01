@@ -22,7 +22,7 @@ Options:
   -v --verbose           print status messages
   -q --quiet             report only file names
   -r --recursive         recursive process nested directories
-  -c NAME --config=NAME  config file name with parsing rules [default: ./nx-ex.yml]
+  -c NAME --config=NAME  config file name with parsing rules [default: ./nxex.yml]
   --out-dir=DIR          dir for save JSON results [default: ./]
   --out-fmt=FMT          template for out JSON file name [default: *+.json]`
 

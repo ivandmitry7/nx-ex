@@ -1,0 +1,11 @@
+# NAVTEX Sources
+- name: ODESA-NAVTEX
+  pattern: '`\sODESA-NAVTEX$`gm'
+  reason: ^1.\s(.*)\s?$
+  time: 010000 UTC DEC 21 THRU 010000 UTC MAR 22
+  coords: 46-17.6N  031-27.1E
+- name: NOVOROSSIYSK
+  pattern: ODESA-NAVTEX
+  reason: 1. NAVAL TRAINING
+  time: 010000 UTC DEC 21 THRU 010000 UTC MAR 22
+  coords: 46-17.6N  031-27.1E

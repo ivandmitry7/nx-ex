@@ -1,4 +1,4 @@
-package result
+package task
 
 import (
 	"crypto/md5"
