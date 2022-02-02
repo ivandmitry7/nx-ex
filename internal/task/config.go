@@ -6,11 +6,11 @@ import (
 )
 
 type ParserCfg struct {
-	Name    string
-	Pattern string
-	Reason  string
-	Time    string
-	Coords  string
+	Name   string
+	Source string
+	Reason string
+	Time   string
+	Coords string
 }
 
 type Config struct {
