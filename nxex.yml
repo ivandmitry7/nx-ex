@@ -2,7 +2,9 @@
 - name: ODESA-NAVTEX
   source: (?m)\b(ODESA-NAVTEX)[\s\r]*$
   reason: (?m)^1\. ([[A-Z\s]*?)[\s\r]+$
-  time: 010000 UTC DEC 21 THRU 010000 UTC MAR 22
+  time: 
+    search: (?s)1\. [[A-Z\s\s\r]*\n(\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20$5-$4-${1}T$2:$3:00Z, 20${10}-$9-${6}T$7:$8:00Z
   coords: 46-17.6N  031-27.1E
 - name: NOVOROSSIYSK
   source: ODESA-NAVTEX
