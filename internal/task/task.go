@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"time"
 )
 
 type Task struct {
@@ -40,15 +41,26 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	if len(files) == 0 {
+	totalFiles := len(files)
+	if totalFiles == 0 {
 		return fmt.Errorf("unable to find files with mask %q\n", mask)
 	}
-
-	if len(files) > 1 {
+	if totalFiles > 1 {
 		fmt.Printf("Found %d files\n", len(files))
 	}
-	for _, fn := range files {
-		_ = t.processFile(fn)
+
+	start := time.Now()
+	okFiles := 0
+	for i, fn := range files {
+		if totalFiles > 1 {
+			fmt.Printf("%d/%d [%d%%] ", i+1, totalFiles, (i+1)*100/totalFiles)
+		}
+		if t.processFile(fn) == nil {
+			okFiles++
+		}
+	}
+	if totalFiles > 1 {
+		fmt.Printf("Total patterns detected in %d files, elapsed time %s", okFiles, time.Since(start))
 	}
 	return nil
 }
@@ -65,7 +77,7 @@ func (t *Task) processFile(filename string) error {
 	var r *Result
 	for i, pc := range t.processors {
 		if pc.Check(msg) {
-			fmt.Printf("Pattern %q dectected, parsing...", t.cfg.Parsers[i].Name)
+			fmt.Printf("pattern %q dectected, parsing... ", t.cfg.Parsers[i].Name)
 			r, err = pc.Parse(msg)
 			if err == nil {
 				r.Commit()
@@ -78,7 +90,7 @@ func (t *Task) processFile(filename string) error {
 				fmt.Println("Ok, json file created")
 				return nil
 			} else {
-				fmt.Printf("Parsing error: %v\n", err)
+				fmt.Printf("parsing error: %v\n", err)
 				return err
 			}
 		}

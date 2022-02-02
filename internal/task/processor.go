@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 )
@@ -20,14 +21,10 @@ func NewProcessor(cfg *ParserCfg) (Processor, error) {
 
 type ReProc struct {
 	detector *regexp.Regexp
-	//detector, _ := regexp.Compile(`cat`)
-	//res := re.FindAllString("black cat meowcat", -1)
-	//fmt.Println(res) // [cat cat]
 }
 
 func (r *ReProc) Compile(cfg *ParserCfg) error {
-	//d, err := regexp.Compile(cfg.Pattern)
-	d, err := regexp.Compile(`\sODESA-NAVTEX$` + "gm")
+	d, err := regexp.Compile(cfg.Pattern)
 	if err != nil {
 		return err
 	}
@@ -45,6 +42,15 @@ func (r ReProc) Check(msg string) bool {
 }
 
 func (r ReProc) Parse(msg string) (*Result, error) {
+	m := r.detector.FindAllStringSubmatch(msg, -1)
+	if m == nil {
+		return nil, errors.New("unable to match source pattern")
+	}
+	if len(m[0]) != 2 {
+		return nil, errors.New("invalid count of source pattern matching")
+	}
+
 	res := Result{}
+	res.Source = m[0][1]
 	return &res, nil
 }
