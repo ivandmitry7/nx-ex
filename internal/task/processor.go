@@ -1,8 +1,8 @@
 package task
 
 import (
-	"errors"
 	"fmt"
+	"github.com/o-kos/nx-ex/internal/parser"
 	"regexp"
 )
 
@@ -19,23 +19,37 @@ func NewProcessor(cfg *ParserCfg) (Processor, error) {
 	return p, nil
 }
 
+type reTimes struct {
+	search  *regexp.Regexp
+	replace string
+}
+
 type ReProc struct {
 	source *regexp.Regexp
 	reason *regexp.Regexp
+	times  []reTimes
 }
 
-func (r *ReProc) Compile(cfg *ParserCfg) error {
+func (p *ReProc) Compile(cfg *ParserCfg) error {
 	re, err := regexp.Compile(cfg.Source)
 	if err != nil {
 		return err
 	}
-	r.source = re
+	p.source = re
 
 	re, err = regexp.Compile(cfg.Reason)
 	if err != nil {
 		return err
 	}
-	r.reason = re
+	p.reason = re
+
+	for _, ts := range cfg.Times {
+		re, err = regexp.Compile(ts.Search)
+		if err != nil {
+			return err
+		}
+		p.times = append(p.times, reTimes{re, ts.Replace})
+	}
 	return nil
 }
 
@@ -49,25 +63,25 @@ func (p ReProc) Check(msg string) bool {
 }
 
 func (p ReProc) Parse(msg string) (*Result, error) {
-	m := p.source.FindAllStringSubmatch(msg, -1)
-	if m == nil {
-		return nil, errors.New("unable to match source pattern")
-	}
-	if len(m[0]) != 2 {
-		return nil, errors.New("invalid count of source pattern matching")
-	}
-
 	res := Result{}
-	res.Source = m[0][1]
+	s, err := parser.ParseText("source", msg, p.source)
+	if err != nil {
+		return nil, err
+	}
+	res.Source = s
 
-	m = p.reason.FindAllStringSubmatch(msg, -1)
-	if m == nil {
-		return nil, errors.New("unable to match reason pattern")
+	s, err = parser.ParseText("reason", msg, p.reason)
+	if err != nil {
+		return nil, err
 	}
-	if len(m[0]) != 2 {
-		return nil, errors.New("invalid count of reason pattern matching")
+	res.Reason = s
+
+	ts, err := p.parseTimes(msg)
+	if err != nil {
+		return nil, err
 	}
-	res.Reason = m[0][1]
+	res.Date.Beg = ts[0].Unix()
+	res.Date.End = ts[1].Unix()
 
 	return &res, nil
 }

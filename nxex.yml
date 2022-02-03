@@ -2,9 +2,13 @@
 - name: ODESA-NAVTEX
   source: (?m)\b(ODESA-NAVTEX)[\s\r]*$
   reason: (?m)^1\. ([[A-Z\s]*?)[\s\r]+$
-  time: 
-    search: (?s)1\. [[A-Z\s\s\r]*\n(\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20$5-$4-${1}T$2:$3:00Z, 20${10}-$9-${6}T$7:$8:00Z
+  times: 
+  - search: (?s)1\. [[A-Z\s\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20$8-$7-${1}T$2:$3:00Z\n20$8-$7-${4}T$5:$6:00Z
+  - search: (?s)1\. [[A-Z\s\s\r]*\n+FROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)[\s\r\n]+THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20$5-$4-${1}T$2:$3:00Z\n20${10}-$9-${6}T$7:$8:00Z
+  - search: (?s)1\. [[A-Z\s\s\r]*\n(\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20$5-$4-${1}T$2:$3:00Z\n20${10}-$9-${5}T$7:$8:00Z
   coords: 46-17.6N  031-27.1E
 - name: NOVOROSSIYSK
   source: ODESA-NAVTEX

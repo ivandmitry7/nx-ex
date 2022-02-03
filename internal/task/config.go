@@ -9,7 +9,10 @@ type ParserCfg struct {
 	Name   string
 	Source string
 	Reason string
-	Time   string
+	Times  []struct {
+		Search  string
+		Replace string
+	}
 	Coords string
 }
 

@@ -12,6 +12,7 @@ import (
 type Date struct {
 	Beg int64 `json:"beg"`
 	End int64 `json:"end"`
+	raw string
 }
 
 type Coords struct {
