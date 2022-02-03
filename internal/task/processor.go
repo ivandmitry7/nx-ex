@@ -76,12 +76,20 @@ func (p ReProc) Parse(msg string) (*Result, error) {
 	}
 	res.Reason = s
 
-	ts, err := p.parseTimes(msg)
-	if err != nil {
-		return nil, err
+	var timeError error = nil
+	for _, t := range p.times {
+		ts, err := parser.ParseDateTime(msg, t.search, t.replace)
+		if err == nil {
+			res.Date.Beg = ts[0].Unix()
+			res.Date.End = ts[1].Unix()
+			break
+		} else {
+			timeError = err
+		}
 	}
-	res.Date.Beg = ts[0].Unix()
-	res.Date.End = ts[1].Unix()
+	if res.Date.Beg == 0 {
+		return nil, timeError
+	}
 
 	return &res, nil
 }

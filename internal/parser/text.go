@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 )
@@ -12,7 +11,7 @@ func ParseText(caption string, msg string, re *regexp.Regexp) (string, error) {
 		return "", fmt.Errorf("unable to match %s pattern", caption)
 	}
 	if len(m[0]) != 2 {
-		return "", errors.New("invalid count of caption pattern matching")
+		return "", fmt.Errorf("invalid count of %s pattern matching", caption)
 	}
 
 	return m[0][1], nil

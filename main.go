@@ -3,9 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/docopt/docopt-go"
-	"os"
-
 	"github.com/o-kos/nx-ex/internal/task"
+	"os"
 )
 
 func main() {

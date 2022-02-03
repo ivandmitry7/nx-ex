@@ -1,14 +1,29 @@
-# NAVTEX Sources
-- name: ODESA-NAVTEX
+- # ODESA-NAVTEX
+  name: ODESA-NAVTEX
   source: (?m)\b(ODESA-NAVTEX)[\s\r]*$
   reason: (?m)^1\. ([[A-Z\s]*?)[\s\r]+$
   times: 
-  - search: (?s)1\. [[A-Z\s\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20$8-$7-${1}T$2:$3:00Z\n20$8-$7-${4}T$5:$6:00Z
-  - search: (?s)1\. [[A-Z\s\s\r]*\n+FROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)[\s\r\n]+THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20$5-$4-${1}T$2:$3:00Z\n20${10}-$9-${6}T$7:$8:00Z
-  - search: (?s)1\. [[A-Z\s\s\r]*\n(\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20$5-$4-${1}T$2:$3:00Z\n20${10}-$9-${5}T$7:$8:00Z
+  - search: 1\. [A-Z\s\r]*\n(\d\d)(\d\d)(\d\d) (?:UTC )?([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${5}T${7}:${8}:00Z
+  - search: 1\. [A-Z\s\r]*\n(\d\d)(\d\d)(\d\d) (?:UTC )?([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d)\s+UTC ([A-Z]{3}) (\d+)
+    replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
+  - search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20${8}-${7}-${1}T${2}:${3}:00Z;20${8}-${7}-${4}T${5}:${6}:00Z
+  - search: 1\. [A-Z\s\r]*\n+FROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)[\s\r\n]+THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${6}T${7}:${8}:00Z
+  - 
+  # FROM 312100 UTC JAN THRU 282100 UTC FEB 22
+    search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+    replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
+  - 
+  # 27-29 JAN, 03-05 FEB, 10-12 FEB 22\nFROM 0600 TO 1600 UTC
+    search: 1\. [A-Z\s\r]*\n(\d\d)-\d\d ([A-Z]{3}).*\d\d-(\d\d) ([A-Z]{3}) (\d\d)[\s\r]*\nFROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+    replace: 20${5}-${2}-${1}T${6}:${7}:00Z;20${5}-${4}-${3}T${8}:${9}:00Z
+  -
+  # 01 THRU 28 FEB 22 FROM 0500 TO 1700 UTC
+  # 25-26 JAN 22\nFROM 0000 TO 1600 UTC
+    search: 1\. [A-Z\s\r]*\n(\d\d)(?:-|\sTHRU\s)(\d\d) ([A-Z]{3}) (\d\d)[\s\r\n]*FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+    replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
   coords: 46-17.6N  031-27.1E
 - name: NOVOROSSIYSK
   source: ODESA-NAVTEX
