@@ -13,7 +13,11 @@ type ParserCfg struct {
 		Search  string
 		Replace string
 	}
-	Coords string
+	Coords []struct {
+		Type    string
+		Search  string
+		Replace string
+	}
 }
 
 type Config struct {

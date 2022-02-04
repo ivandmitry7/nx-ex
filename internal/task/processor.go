@@ -24,10 +24,17 @@ type reTimes struct {
 	replace string
 }
 
+type reCoords struct {
+	kind    string
+	search  *regexp.Regexp
+	replace string
+}
+
 type ReProc struct {
 	source *regexp.Regexp
 	reason *regexp.Regexp
 	times  []reTimes
+	coords []reCoords
 }
 
 func (p *ReProc) Compile(cfg *ParserCfg) error {
@@ -49,6 +56,14 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 			return err
 		}
 		p.times = append(p.times, reTimes{re, ts.Replace})
+	}
+
+	for _, cs := range cfg.Coords {
+		re, err = regexp.Compile(cs.Search)
+		if err != nil {
+			return err
+		}
+		p.coords = append(p.coords, reCoords{cs.Type, re, cs.Replace})
 	}
 	return nil
 }
@@ -78,10 +93,11 @@ func (p ReProc) Parse(msg string) (*Result, error) {
 
 	var timeError error = nil
 	for _, t := range p.times {
-		ts, err := parser.ParseDateTime(msg, t.search, t.replace)
+		raw, ts, err := parser.ParseDateTime(msg, t.search, t.replace)
 		if err == nil {
 			res.Date.Beg = ts[0].Unix()
 			res.Date.End = ts[1].Unix()
+			res.Date.raw = raw
 			break
 		} else {
 			timeError = err
@@ -91,5 +107,20 @@ func (p ReProc) Parse(msg string) (*Result, error) {
 		return nil, timeError
 	}
 
+	//var coordError error = nil
+	//for _, c := range p.coords {
+	//	r, cs, err := parser.ParseCoords(msg, c.type, c.search, c.replace)
+	//	if err == nil {
+	//		res.PushCoords(r, cs)
+	//		res.Date.Beg = ts[0].Unix()
+	//		res.Date.End = ts[1].Unix()
+	//		break
+	//	} else {
+	//		timeError = err
+	//	}
+	//}
+	//if res.Date.Beg == 0 {
+	//	return nil, timeError
+	//}
 	return &res, nil
 }

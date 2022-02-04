@@ -16,13 +16,14 @@ func TestParseDateTime(t *testing.T) {
 	re, err := regexp.Compile(search)
 	require.NoError(t, err)
 
-	times, err := ParseDateTime(msg, re, replace)
+	raw, times, err := ParseDateTime(msg, re, replace)
 	require.NoError(t, err)
+	assert.Equal(t, "2021-12-01T12:34:00Z;2022-03-10T07:13:00Z", raw)
 	t0, _ := time.Parse(time.RFC3339, "2021-12-01T12:34:00Z")
 	assert.Equal(t, t0, times[0])
 	t1, _ := time.Parse(time.RFC3339, "2022-03-10T07:13:00Z")
 	assert.Equal(t, t1, times[1])
 
-	_, err = ParseDateTime(msg, re, "${111}")
+	_, _, err = ParseDateTime(msg, re, "${111}")
 	assert.EqualError(t, err, "unable to apply datetime replace pattern")
 }

@@ -42,31 +42,39 @@ func templateToString(template string, values []string) (string, error) {
 	return str, retErr
 }
 
-func ParseDateTime(msg string, re *regexp.Regexp, template string) ([]time.Time, error) {
+func ParseDateTime(msg string, re *regexp.Regexp, template string) (raw string, times [2]time.Time, err error) {
 	m := re.FindAllStringSubmatch(msg, -1)
 	if m == nil {
-		return nil, errors.New("unable to match datetime pattern")
+		err = errors.New("unable to match coords pattern")
+		return
 	}
 	if len(m[0]) < 2 {
-		return nil, errors.New("invalid results of datetime matching")
+		err = errors.New("invalid results of coords matching")
+		return
 	}
 
 	timeStr, err := templateToString(template, m[0])
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	ts := strings.Split(timeStr, ";")
 	if len(ts) != 2 {
-		return nil, errors.New("invalid results of datetime matching")
+		err = errors.New("invalid results of datetime matching")
+		return
 	}
 	t0, err := time.Parse(time.RFC3339, ts[0])
 	if err != nil {
-		return nil, errors.New("invalid results of datetime matching")
+		err = errors.New("invalid results of datetime matching")
+		return
 	}
 	t1, err := time.Parse(time.RFC3339, ts[1])
 	if err != nil {
-		return nil, errors.New("invalid results of datetime matching")
+		err = errors.New("invalid results of datetime matching")
+		return
 	}
-	return []time.Time{t0, t1}, nil
+
+	raw = timeStr
+	times = [2]time.Time{t0, t1}
+	return
 }
