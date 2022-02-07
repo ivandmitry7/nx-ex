@@ -28,7 +28,7 @@
   - 
   # IN AREA BOUNDED BY\n45-59.73N 030-19.87E\n46-11.46N 030-59.93E\n2. CANCEL THIS MSG 
     type: polygon
-    search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d.\d\s?[NS]\s+0\d\d-\d\d.\d\s?[EW]+\r?\n)+)2. CANCEL
+    search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]+\r?\n)+)2. CANCEL
   - 
   # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
     type: circle
@@ -37,7 +37,7 @@
   - 
   # AREAS BOUNDED BY\nA. 45-44.5N 031-33.0E\n   45-45.3N 032-01.0E\nB. 45-24.0N 031-34.0E\n   45-24.0N 032-00.0E2. CANCEL THIS MSG 
     type: polygons
-    search: AREAS BOUNDED BY[\s\r]?\n([A-Z].(\s+\d\d-\d\d.\d\s?[NS]\s0\d\d-\d\d.\d\s?[EW]\n)+)+2.\s
+    search: AREAS BOUNDED BY\r?\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\r?\n)+)2. CANCEL
 - name: NOVOROSSIYSK
   source: ODESA-NAVTEX
   reason: 1. NAVAL TRAINING

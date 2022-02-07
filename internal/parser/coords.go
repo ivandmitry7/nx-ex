@@ -86,7 +86,7 @@ func parseCircle(template string, values []string) (area []Area, e error) {
 }
 
 func parsePolygon(cstr string) (area []Area, e error) {
-	re, err := regexp.Compile(`((\d\d-\d\d.\d\s?[NS])\s+0(\d\d-\d\d.\d\s?[EW])+)\r?\n?`)
+	re, err := regexp.Compile(`((\d\d-\d\d.\d+\s?[NS])\s+0?(\d\d-\d\d.\d+\s?[EW])+)\r?\n?`)
 	if err != nil {
 		e = err
 		return
@@ -134,6 +134,38 @@ func parsePolygon(cstr string) (area []Area, e error) {
 	return
 }
 
+func parsePolygons(cstr string) (area []Area, e error) {
+	re, err := regexp.Compile(`[A-Z].((?:\s+.*\r?\n)+)`)
+	if err != nil {
+		e = err
+		return
+	}
+
+	m := re.FindAllStringSubmatch(cstr, -1)
+	if m == nil {
+		e = errors.New("unable to match polygons coords pattern")
+		return
+	}
+	if len(m) != 2 {
+		e = errors.New("invalid results of polygons coords matching")
+		return
+	}
+
+	for _, cp := range m {
+		if len(cp) != 2 {
+			e = errors.New("unable to match polygons coords pattern")
+			return
+		}
+		a, err := parsePolygon(cp[1])
+		if err != nil {
+			e = err
+			return
+		}
+		area = append(area, a[0])
+	}
+	return
+}
+
 func ParseCoords(msg string, kind string, re *regexp.Regexp, template string) (area []Area, err error) {
 	m := re.FindAllStringSubmatch(msg, -1)
 	if m == nil {
@@ -150,6 +182,8 @@ func ParseCoords(msg string, kind string, re *regexp.Regexp, template string) (a
 		area, err = parseCircle(template, m[0])
 	case "polygon":
 		area, err = parsePolygon(m[0][1])
+	case "polygons":
+		area, err = parsePolygons(m[0][1])
 	default:
 		err = fmt.Errorf("unknown coordinates type %q", kind)
 	}
