@@ -36,13 +36,13 @@ func TestResult_makeID(t *testing.T) {
 		Date:   Date{Beg: 1638316800, End: 1646092800},
 		Area: []Area{
 			{
-				Raw: "polygon/[[44-34.5N 037-42.0E], [44-31.5N 037-50.0E], [44-20.5N 037-48.0E]]",
+				Raw: "[44-34.5N 37-42.0E, 44-31.5N 37-50.0E, 44-20.5N 37-48.0E]",
 			},
 		},
 	}
 	assert.Equal(
 		t,
-		"ODESA-NAVTEX#NAVAL-TRAINING:2021-12-01T00:00:00Z...2022-03-01T00:00:00Z[[polygon/[[44-34.5N 037-42.0E], [44-31.5N 037-50.0E], [44-20.5N 037-48.0E]]]]",
+		"ODESA-NAVTEX#NAVAL-TRAINING/2021-12-01T00:00:00Z...2022-03-01T00:00:00Z[[44-34.5N 37-42.0E, 44-31.5N 37-50.0E, 44-20.5N 37-48.0E]]",
 		r.makeID(),
 	)
 }
@@ -54,10 +54,10 @@ func TestResult_Commit(t *testing.T) {
 		Date:   Date{Beg: 1638316800, End: 1646092800},
 		Area: []Area{
 			{
-				Raw: "polygon/[[44-34.5N 037-42.0E], [44-31.5N 037-50.0E], [44-20.5N 037-48.0E]]",
+				Raw: "[44-34.5N 37-42.0E, 44-31.5N 37-50.0E, 44-20.5N 37-48.0E]",
 			},
 		},
 	}
 	r.Commit()
-	assert.Equal(t, "50677145aef19ed76a6d2b4b7b304455", r.Hash)
+	assert.Equal(t, "fff4bd10108fe516bf59d1b3cd4d6fb0", r.Hash)
 }

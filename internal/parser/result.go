@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -38,12 +37,12 @@ type Result struct {
 func (r *Result) makeID() string {
 	as := ""
 	for _, a := range r.Area {
-		as = as + fmt.Sprintf("[%s], ", a.Raw)
+		as = as + fmt.Sprintf("%s, ", a.Raw)
 	}
 	as = strings.TrimSuffix(as, ", ")
 
 	id := fmt.Sprintf(
-		"%s#%s:%s...%s[%s]",
+		"%s#%s/%s...%s[%s]",
 		r.Source, r.Reason,
 		time.Unix(r.Date.Beg, 0).UTC().Format(time.RFC3339),
 		time.Unix(r.Date.End, 0).UTC().Format(time.RFC3339),
@@ -51,30 +50,6 @@ func (r *Result) makeID() string {
 	)
 
 	return id
-}
-
-func (r *Result) PushCoords(radius string, coords []string) {
-	a := Area{}
-	if radius == "" {
-		a.Radius = 0
-		a.Type = "polygon"
-	} else {
-		a.Type = "circle"
-		if ml, err := strconv.ParseFloat(radius, 32); err == nil {
-			a.Radius = float32(ml * 1.852)
-		} else {
-			fmt.Printf("unable to convert radius value %q\n", radius)
-			a.Radius = 0
-		}
-	}
-
-	cs := ""
-	for _, c := range coords {
-		//a.Coords = append(a.Coords, Coords{raw: c})
-		cs += fmt.Sprintf("[%s], ", c)
-	}
-	//a.raw = fmt.Sprintf("%s/%s[%s]", a.Type, radius, strings.TrimSuffix(cs, ", "))
-	r.Area = append(r.Area, a)
 }
 
 func (r *Result) Commit() {

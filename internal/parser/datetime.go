@@ -3,46 +3,23 @@ package parser
 import (
 	"errors"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
 
-func templateToString(template string, values []string) (string, error) {
-	r := regexp.MustCompile(`\${(\d+)}`)
-	var retErr error = nil
-	dtErr := errors.New("unable to apply datetime replace pattern")
-	str := r.ReplaceAllStringFunc(
-		template, func(m string) string {
-			if retErr != nil {
-				return ""
-			}
-			parts := r.FindStringSubmatch(m)
-			if len(parts) < 2 {
-				retErr = dtErr
-				return ""
-			}
-			idx, err := strconv.Atoi(parts[1])
-			if err != nil || idx >= len(values) {
-				retErr = dtErr
-				return ""
-			}
+func monthsToNumber(month string) string {
+	months := map[string]string{
+		"JAN": "01", "FEB": "02", "MAR": "03", "APR": "04", "MAY": "05", "JUN": "06",
+		"JUL": "07", "AUG": "08", "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12",
+	}
+	if val, ok := months[month]; ok {
+		return val
+	}
 
-			months := map[string]string{
-				"JAN": "01", "FEB": "02", "MAR": "03", "APR": "04", "MAY": "05", "JUN": "06",
-				"JUL": "07", "AUG": "08", "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12",
-			}
-			if val, ok := months[values[idx]]; ok {
-				return val
-			}
-
-			return values[idx]
-		},
-	)
-	return str, retErr
+	return month
 }
 
-func ParseDateTime(msg string, re *regexp.Regexp, template string) (raw string, times [2]time.Time, err error) {
+func ParseDateTime(msg string, re *regexp.Regexp, template string) (times Date, err error) {
 	m := re.FindAllStringSubmatch(msg, -1)
 	if m == nil {
 		err = errors.New("unable to match coords pattern")
@@ -53,7 +30,7 @@ func ParseDateTime(msg string, re *regexp.Regexp, template string) (raw string, 
 		return
 	}
 
-	timeStr, err := templateToString(template, m[0])
+	timeStr, err := TemplateToStringFunc(template, m[0], monthsToNumber)
 	if err != nil {
 		return
 	}
@@ -74,7 +51,8 @@ func ParseDateTime(msg string, re *regexp.Regexp, template string) (raw string, 
 		return
 	}
 
-	raw = timeStr
-	times = [2]time.Time{t0, t1}
+	times.Beg = t0.Unix()
+	times.End = t1.Unix()
+	times.Raw = timeStr
 	return
 }

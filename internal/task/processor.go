@@ -8,7 +8,7 @@ import (
 
 type Processor interface {
 	Check(msg string) bool
-	Parse(msg string) (*Result, error)
+	Parse(msg string) (*parser.Result, error)
 }
 
 func NewProcessor(cfg *ParserCfg) (Processor, error) {
@@ -51,7 +51,7 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 	p.reason = re
 
 	for _, ts := range cfg.Times {
-		re, err = regexp.Compile(ts.Search)
+		re, err := regexp.Compile(ts.Search)
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 	}
 
 	for _, cs := range cfg.Coords {
-		re, err = regexp.Compile(cs.Search)
+		re, err := regexp.Compile(cs.Search)
 		if err != nil {
 			return err
 		}
@@ -77,8 +77,8 @@ func (p ReProc) Check(msg string) bool {
 	}
 }
 
-func (p ReProc) Parse(msg string) (*Result, error) {
-	res := Result{}
+func (p ReProc) Parse(msg string) (*parser.Result, error) {
+	res := parser.Result{}
 	s, err := parser.ParseText("source", msg, p.source)
 	if err != nil {
 		return nil, err
@@ -93,34 +93,30 @@ func (p ReProc) Parse(msg string) (*Result, error) {
 
 	var timeError error = nil
 	for _, t := range p.times {
-		raw, ts, err := parser.ParseDateTime(msg, t.search, t.replace)
+		ts, err := parser.ParseDateTime(msg, t.search, t.replace)
 		if err == nil {
-			res.Date.Beg = ts[0].Unix()
-			res.Date.End = ts[1].Unix()
-			res.Date.raw = raw
+			res.Date = ts
 			break
 		} else {
 			timeError = err
 		}
 	}
 	if res.Date.Beg == 0 {
-		return nil, timeError
+		return nil, fmt.Errorf("%v for datetime field", timeError)
 	}
 
-	//var coordError error = nil
-	//for _, c := range p.coords {
-	//	r, cs, err := parser.ParseCoords(msg, c.type, c.search, c.replace)
-	//	if err == nil {
-	//		res.PushCoords(r, cs)
-	//		res.Date.Beg = ts[0].Unix()
-	//		res.Date.End = ts[1].Unix()
-	//		break
-	//	} else {
-	//		timeError = err
-	//	}
-	//}
-	//if res.Date.Beg == 0 {
-	//	return nil, timeError
-	//}
+	var coordError error = nil
+	for _, c := range p.coords {
+		a, err := parser.ParseCoords(msg, c.kind, c.search, c.replace)
+		if err == nil {
+			res.Area = a
+			break
+		} else {
+			coordError = err
+		}
+	}
+	if res.Area == nil {
+		return nil, coordError
+	}
 	return &res, nil
 }
