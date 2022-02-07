@@ -28,7 +28,7 @@
   - 
   # IN AREA BOUNDED BY\n45-59.73N 030-19.87E\n46-11.46N 030-59.93E\n2. CANCEL THIS MSG 
     type: polygon
-    search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]+\r?\n)+)2. CANCEL
+    search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d(?:.\d+)?\s?[NS]\s+0?\d\d-\d\d(?:.\d+)?\s?[EW]( AND COASTLINE)?\r?\n)+)2. CANCEL
   - 
   # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
     type: circle

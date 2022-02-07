@@ -22,7 +22,7 @@ func coordsToFloat(d string, m string, s string, l string) float32 {
 }
 
 func stringToCoord(cs string) (coord float32, e error) {
-	re, err := regexp.Compile(`(\d+)-(\d+).(\d+)\s?([NSEW])`)
+	re, err := regexp.Compile(`(\d+)-(\d+)(?:.(\d+))?\s?([NSEW])`)
 	if err != nil {
 		e = fmt.Errorf("unable to parse coordinate string %q", cs)
 		return
@@ -86,7 +86,7 @@ func parseCircle(template string, values []string) (area []Area, e error) {
 }
 
 func parsePolygon(cstr string) (area []Area, e error) {
-	re, err := regexp.Compile(`((\d\d-\d\d.\d+\s?[NS])\s+0?(\d\d-\d\d.\d+\s?[EW])+)\r?\n?`)
+	re, err := regexp.Compile(`((\d+-\d+(?:.\d+)?\s?[NS])\s+0?(\d+-\d+(?:.\d+)?\s?[EW])+)\r?\n?`)
 	if err != nil {
 		e = err
 		return

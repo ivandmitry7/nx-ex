@@ -19,6 +19,8 @@ func NewTask() *Task {
 	return &Task{}
 }
 
+var ErrUndetectedPattern error = errors.New("unable to detect pattern")
+
 func (t *Task) Execute(opts map[string]interface{}) error {
 	cfgPath := opts["--config"].(string)
 	cfg, err := NewConfig(cfgPath)
@@ -52,16 +54,26 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 
 	start := time.Now()
 	okFiles := 0
+	badFiles := 0
 	for i, fn := range files {
 		if totalFiles > 1 {
 			fmt.Printf("%d/%d [%d%%] ", i+1, totalFiles, (i+1)*100/totalFiles)
 		}
-		if t.processFile(fn) == nil {
+		err := t.processFile(fn)
+		if err == nil {
 			okFiles++
+		} else {
+			if !errors.Is(err, ErrUndetectedPattern) {
+				badFiles++
+			}
 		}
 	}
 	if totalFiles > 1 {
-		fmt.Printf("Total patterns detected in %d files, elapsed time %s", okFiles, time.Since(start))
+		badMsg := ""
+		if badFiles > 0 {
+			badMsg = fmt.Sprintf("%d files has errors, ", badFiles)
+		}
+		fmt.Printf("Total patterns detected in %d files, %selapsed time %s", okFiles, badMsg, time.Since(start))
 	}
 	return nil
 }
@@ -97,6 +109,6 @@ func (t *Task) processFile(filename string) error {
 		}
 	}
 
-	fmt.Println("unable to detect pattern")
-	return errors.New("unable to detect pattern")
+	fmt.Println(ErrUndetectedPattern.Error())
+	return ErrUndetectedPattern
 }
