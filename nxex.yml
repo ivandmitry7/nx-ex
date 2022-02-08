@@ -1,3 +1,8 @@
+######################################################### 
+# Custom meta sequences
+# \_ -> (?:\s|\r?\n)
+# \M -> JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC
+######################################################### 
 - # ODESA-NAVTEX
   name: ODESA-NAVTEX
   source: (?m)\b(ODESA-NAVTEX)[\s\r]*$
@@ -12,38 +17,66 @@
   - search: 1\. [A-Z\s\r]*\n+FROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)[\s\r\n]+THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
     replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${6}T${7}:${8}:00Z
   - 
-  # FROM 312100 UTC JAN THRU 282100 UTC FEB 22
+    # FROM 312100 UTC JAN THRU 282100 UTC FEB 22
     search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
     replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
   - 
-  # 27-29 JAN, 03-05 FEB, 10-12 FEB 22\nFROM 0600 TO 1600 UTC
+    # 27-29 JAN, 03-05 FEB, 10-12 FEB 22\nFROM 0600 TO 1600 UTC
     search: 1\. [A-Z\s\r]*\n(\d\d)-\d\d ([A-Z]{3}).*\d\d-(\d\d) ([A-Z]{3}) (\d\d)[\s\r]*\nFROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
     replace: 20${5}-${2}-${1}T${6}:${7}:00Z;20${5}-${4}-${3}T${8}:${9}:00Z
   -
-  # 01 THRU 28 FEB 22 FROM 0500 TO 1700 UTC
-  # 25-26 JAN 22\nFROM 0000 TO 1600 UTC
+    # 01 THRU 28 FEB 22 FROM 0500 TO 1700 UTC
+    # 25-26 JAN 22\nFROM 0000 TO 1600 UTC
     search: 1\. [A-Z\s\r]*\n(\d\d)(?:-|\sTHRU\s)(\d\d) ([A-Z]{3}) (\d\d)[\s\r\n]*FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
     replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
   coords: 
   - 
-  # IN AREA BOUNDED BY\n45-59.73N 030-19.87E\n46-11.46N 030-59.93E\n2. CANCEL THIS MSG 
+    # IN AREA BOUNDED BY
+    # 45-59.73N 030-19.87E
+    # 46-11.46N 030-59.93E
+    # 2. CANCEL THIS MSG 
     type: polygon
     search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d(?:.\d+)?\s?[NS]\s+0?\d\d-\d\d(?:.\d+)?\s?[EW]( AND COASTLINE)?\r?\n)+)2. CANCEL
   - 
-  # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
+    # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
     type: circle
     search: (?m)^WITHIN (\d\d) CABLES OF (\d\d-\d\d.\d)\s?([NS])\s+(0\d\d-\d\d.\d\d)\s?([EW])\r?$
     replace: ${1}Cr${2}${3} ${4}${5}
   - 
-  # AREAS BOUNDED BY\nA. 45-44.5N 031-33.0E\n   45-45.3N 032-01.0E\nB. 45-24.0N 031-34.0E\n   45-24.0N 032-00.0E2. CANCEL THIS MSG 
+    # AREAS BOUNDED BY
+    # A. 45-44.5N 031-33.0E
+    #    45-45.3N 032-01.0E
+    # B. 45-24.0N 031-34.0E
+    #    45-24.0N 032-00.0E
+    # 2. CANCEL THIS MSG 
     type: polygons
     search: AREAS BOUNDED BY\r?\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\r?\n)+)2. CANCEL
-- name: NOVOROSSIYSK
-  source: ODESA-NAVTEX
-  reason: 1. NAVAL TRAINING
-  time: 010000 UTC DEC 21 THRU 010000 UTC MAR 22
+
+- # NOVOROSSIYSK
+  name: NOVOROSSIYSK
+  source: (?m)^.*(NOVOROSSIYSK) \d+\r?$
+  reason: (?m)^1. (\w+ \w+) \d.*\r?$
+  times: 
+  - 
+    # 1. NAVAL TRAINING 01 THRU 31 JAN 22 FROM 0500 TO 1700 UTC DAILY
+    search: 1. \D+ (\d+) THRU (\d+) ([A-Z]{3}) (\d+) FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+    replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+  -
+    # 1. FIRING EXERCISES 12 13 19 20 26 AND 27 JAN 22 FROM 0900 TO 1500
+    # UTC NAVIGATION TEMPORARILY PROHIBITED IN AREA BOUNDED BY 45-03N
+    search: 1. \D+ (\d+) (?:\d+\s)+AND (\d+) ([A-Z]{3}) (\d\d) FROM (\d\d)(\d\d) TO (\d\d)(\d\d)(?:\s|\r\n)UTC
+    replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+  - 
+    # 1. NAVAL TRAINING 27 AND 28 DEC 1 AND 10 THRU 15 JAN 22 FROM 1400
+    # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
+    # search: 1. \D+ (\d+) .*? (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) .* (\d+) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d\d)(?:\s|\r\n)?FROM (\d\d)(\d\d)(?:\s|\r\n)?TO(?:\s|\r\n)?(\d\d)(\d\d) UTC
+    search: 1. \D+ (\d+) .*?\_(\M)\_.*\_(\d+)\_(\M)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
+    replace: 20${5}-${2}-${1}T${6}:${7}:00Z;20${5}-${4}-${3}T${8}:${9}:00Z
   coords: 
   - 
-  # IN AREA BOUNDED BY\n45-59.73N 030-19.87E\n46-11.46N 030-59.93E AND COASTLINE\n2. CANCEL THIS MSG 
+    # EXCEPT SUNDAYS NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
+    # 45-03.5N 036-17.0E 44-57.5N 036-23.0E 44-45.0N 036-24.0E 44-45.0N
+    # 035-50.0E 45-00.0N 035-50.0E AND COASTLINE
+    # 2. CANCEL THIS MESSAGE 311800 UTC JAN 22
     type: polygon
-    search: AREA BOUNDED BY[\s\r]?\n((?:\d\d-\d\d.\d\d\s?[NS]\s+0\d\d-\d\d.\d\d\s?[EW][\n|\s])+)(AND COASTLINE\n)?2.\s
+    search: AREA BOUNDED BY(?:\s|\r\n)?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)(?:\sAND COASTLINE)?\r?\n2. CANCEL

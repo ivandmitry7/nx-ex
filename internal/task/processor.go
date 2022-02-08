@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/o-kos/nx-ex/internal/parser"
 	"regexp"
+	"strings"
 )
 
 type Processor interface {
@@ -38,20 +39,25 @@ type ReProc struct {
 }
 
 func (p *ReProc) Compile(cfg *ParserCfg) error {
-	re, err := regexp.Compile(cfg.Source)
+	r := strings.NewReplacer(
+		`\_`, `(?:\s|\r?\n)`,
+		`\M`, `JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC`,
+	)
+
+	re, err := regexp.Compile(r.Replace(cfg.Source))
 	if err != nil {
 		return err
 	}
 	p.source = re
 
-	re, err = regexp.Compile(cfg.Reason)
+	re, err = regexp.Compile(r.Replace(cfg.Reason))
 	if err != nil {
 		return err
 	}
 	p.reason = re
 
 	for _, ts := range cfg.Times {
-		re, err := regexp.Compile(ts.Search)
+		re, err := regexp.Compile(r.Replace(ts.Search))
 		if err != nil {
 			return err
 		}
@@ -59,7 +65,7 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 	}
 
 	for _, cs := range cfg.Coords {
-		re, err := regexp.Compile(cs.Search)
+		re, err := regexp.Compile(r.Replace(cs.Search))
 		if err != nil {
 			return err
 		}
