@@ -22,11 +22,11 @@ func monthsToNumber(month string) string {
 func ParseDateTime(msg string, re *regexp.Regexp, template string) (times Date, err error) {
 	m := re.FindAllStringSubmatch(msg, -1)
 	if m == nil {
-		err = errors.New("unable to match coords pattern")
+		err = errors.New("unable to match pattern")
 		return
 	}
 	if len(m[0]) < 2 {
-		err = errors.New("invalid results of coords matching")
+		err = errors.New("invalid results of datetime matching")
 		return
 	}
 

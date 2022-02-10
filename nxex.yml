@@ -95,7 +95,7 @@
 - # KALININGRAD
   name: KALININGRAD
   source: (?m)^(KALININGRAD) NAV WARN\s\d+/\d+\r?$
-  reason: SOUTHEASTERN BALTIC\r?\n(\w+ \w+) \d.*\r?\n
+  reason: KALININGRAD NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(\w+ \w+) \d.*\r?\n
   times: 
   - 
     # SOUTHEASTERN BALTIC
@@ -103,6 +103,12 @@
     # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
     search: SOUTHEASTERN BALTIC\r?\n\w+ \w+ (\d+)-(\d+) (\M) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
     replace: 20${Y}-${3}-${1}T${4}:${5}:00Z;20${Y}-${3}-${2}T${6}:${7}:00Z
+  -
+    # SOUTHEASTERN BALTIC
+    # SHIPS EXERCISES 31 JAN THRU 05 FEB 0500 TO 1600 UTC
+    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+    search: KALININGRAD NAV WARN \d\d\d\/(\d\d)\r?\n(?:\r?\n)?(?:.*\r?\n)\w+ \w+ (\d+) (JAN) THRU (\d+) (FEB) (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+    replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${8}:${9}:00Z
   coords: 
   - 
     # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
@@ -111,4 +117,13 @@
     type: circle
     search: DANGEROUS TO SHIPPING\r?\n([B|K])R-(\d+) CENTERED (\d+-\d+[NS]) 0(\d+-\d+[EW])\r?\nCANCEL
     replace: ${2}${1}r${3} ${4}
+  - 
+    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+    # 55-32.0N 019-01.6E 55-32.0N 019-50.0E
+    # 55-03.0N 019-35.0E 54-46.4N 019-35.0E
+    # 54-50.3N 019-20.3E 55-11.5N 019-09.2E
+    # 55-20.0N 019-04.6E
+    # CANCEL THIS MSG 151700 UTC JAN
+    type: polygon
+    search: DANGEROUS TO SHIPPING(?:\s|\r\n)?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)\r?\nCANCEL
 
