@@ -47,7 +47,7 @@ func parseCircle(template string, values []string) (area []Area, e error) {
 		e = err
 		return
 	}
-	re, err := regexp.Compile(`(\d+)([CBK])r(\d+)-(\d+).(\d+)([NS]) (\d+)-(\d+).(\d+)([EW])`)
+	re, err := regexp.Compile(`(\d+)([CBK])r(\d+)-(\d+)(?:\.(\d+))?\s?([NS])\s+(\d+)-(\d+)(?:\.(\d+))?\s?([EW])`)
 	if err != nil {
 		e = err
 		return
@@ -86,7 +86,7 @@ func parseCircle(template string, values []string) (area []Area, e error) {
 }
 
 func parsePolygon(cstr string) (area []Area, e error) {
-	re, err := regexp.Compile(`((\d+-\d+(?:.\d+)?\s?[NS])\s+0?(\d+-\d+(?:.\d+)?\s?[EW])+)\r?\n?`)
+	re, err := regexp.Compile(`((\d+-\d+(?:\.\d+)?\s?[NS])\s+0?(\d+-\d+(?:\.\d+)?\s?[EW])+)\r?\n?`)
 	if err != nil {
 		e = err
 		return

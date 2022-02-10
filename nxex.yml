@@ -1,7 +1,9 @@
 ######################################################### 
 # Custom meta sequences
-# \_ -> (?:\s|\r?\n)
-# \M -> JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC
+# \_   (?:\s|\r?\n)
+# \M   JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC
+# Custom substitution macros
+# ${Y} Current year (last 2 digits) 
 ######################################################### 
 - # ODESA-NAVTEX
   name: ODESA-NAVTEX
@@ -89,3 +91,24 @@
     # 2. CANCEL THIS MESSAGE 151900 UTC JAN 22
     type: polygons
     search: (?s)AREAS BOUNDED BY((?:\r?\n(?:[A-Z]\.(?:(?:\s|\r?\n)\d+-\d+\.\d+\s?[NSEW])+))+)\r?\n2\. CANCEL
+
+- # KALININGRAD
+  name: KALININGRAD
+  source: (?m)^(KALININGRAD) NAV WARN\s\d+/\d+\r?$
+  reason: SOUTHEASTERN BALTIC\r?\n(\w+ \w+) \d.*\r?\n
+  times: 
+  - 
+    # SOUTHEASTERN BALTIC
+    # SHIPS EXERCISES 10-15 JAN 0500-1600 UTC
+    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+    search: SOUTHEASTERN BALTIC\r?\n\w+ \w+ (\d+)-(\d+) (\M) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
+    replace: 20${Y}-${3}-${1}T${4}:${5}:00Z;20${Y}-${3}-${2}T${6}:${7}:00Z
+  coords: 
+  - 
+    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+    # BR-161 CENTERED 55-06N 019-50E
+    # CANCEL THIS MSG  151700 UTC JAN
+    type: circle
+    search: DANGEROUS TO SHIPPING\r?\n([B|K])R-(\d+) CENTERED (\d+-\d+[NS]) 0(\d+-\d+[EW])\r?\nCANCEL
+    replace: ${2}${1}r${3} ${4}
+

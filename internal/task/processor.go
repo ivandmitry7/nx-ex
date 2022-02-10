@@ -5,6 +5,7 @@ import (
 	"github.com/o-kos/nx-ex/internal/parser"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type Processor interface {
@@ -56,12 +57,13 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 	}
 	p.reason = re
 
+	rt := strings.NewReplacer(`${Y}`, time.Now().Format("2006")[2:])
 	for _, ts := range cfg.Times {
 		re, err := regexp.Compile(r.Replace(ts.Search))
 		if err != nil {
 			return err
 		}
-		p.times = append(p.times, reTimes{re, ts.Replace})
+		p.times = append(p.times, reTimes{re, rt.Replace(ts.Replace)})
 	}
 
 	for _, cs := range cfg.Coords {
