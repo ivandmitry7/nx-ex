@@ -125,5 +125,38 @@
     # 55-20.0N 019-04.6E
     # CANCEL THIS MSG 151700 UTC JAN
     type: polygon
-    search: DANGEROUS TO SHIPPING(?:\s|\r\n)?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)\r?\nCANCEL
+    search: DANGEROUS TO SHIPPING\_?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)\r?\nCANCEL
 
+- # LITHUANIAN
+  name: LITHUANIAN
+  source: (?m)^(LITHUANIAN) NAV WARN\s\d+\/\d+\r?$
+  reason: LITHUANIAN NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(\w+ \w+) \d.*\r?\n
+  times: 
+  - 
+    # LITHUANIAN NAV WARN 004/22
+    # SOUTH-EASTERN BALTIC. LITHUANIAN COAST. 
+    # MILITARY EXERCISES 1 FEB 0700-1500 UTC
+    # IN AREA EYD-17 BOUNDED BY:
+    search: LITHUANIAN NAV WARN \d\d\d\/(\d\d)\r?\n\_?(?:.*\r?\n)\w+ \w+ (\d+) (\M) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
+    replace: 20${1}-${3}-${2}T${4}:${5}:00Z;20${1}-${3}-${2}T${6}:${7}:00Z
+  -
+    # LITHUANIAN NAV WARN 003/22
+    # SOUTH-EASTERN BALTIC. LITHUANIAN COAST - MILITARY EXERCISES
+    # MILITARY EXERCISES 250800 TO 251400 UTC JAN
+    # AND 260800 TO 261400 UTC JAN
+    # IN AREA EYD-17 BOUNDED BY:
+    search: (?s)LITHUANIAN NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)\w+ \w+ (\d\d)(\d\d)(\d\d) TO \d\d\d\d\d\d UTC (\M).*TO (\d\d)(\d\d)(\d\d) UTC (\M)
+    replace: 20${1}-${5}-${2}T${3}:${4}:00Z;20${1}-${9}-${6}T${7}:${8}:00Z
+  coords: 
+  - 
+    # IN AREA EYD-17 BOUNDED BY:
+    # 55-36.98N 020-45.88E
+    # 55-38.13N 021-09.00E
+    # 55-31.40N 021-13.30E
+    # 55-24.98N 020-59.88E
+    # 55-21.98N 020-45.88E
+    # 55-24.98N 020-41.88E
+    # 55-33.98N 020-41.88E.
+    # AREA TEMPORARILY DANGEROUS TO SHIPPING.
+    type: polygon
+    search: IN AREA (?:.*)BOUNDED BY:\r?\n((?:\d+-\d+\.\d+[NWES](?:\s|\r?\n|\.))+)\r?\nAREA
