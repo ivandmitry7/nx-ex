@@ -7,6 +7,7 @@ import (
 	"github.com/o-kos/nx-ex/internal/parser"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -78,6 +79,17 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 	return nil
 }
 
+func normalizeCRLF(str string) string {
+	for {
+		ns := strings.ReplaceAll(str, "\r\n", "\n")
+		if len(ns) == len(str) {
+			break
+		}
+		str = ns
+	}
+	return strings.ReplaceAll(str, "\r", "\n")
+}
+
 func (t *Task) processFile(filename string) error {
 	fmt.Printf("Process file %q... ", filename)
 	b, err := ioutil.ReadFile(filename)
@@ -85,7 +97,7 @@ func (t *Task) processFile(filename string) error {
 		fmt.Printf("unable to read file %q: %v\n", filename, err)
 		return err
 	}
-	msg := string(b)
+	msg := normalizeCRLF(string(b))
 
 	var r *parser.Result
 	for i, pc := range t.processors {
@@ -100,7 +112,7 @@ func (t *Task) processFile(filename string) error {
 					fmt.Printf("unable to write result to file %q\n", jfn)
 					return err
 				}
-				fmt.Println("Ok, json file created")
+				fmt.Printf("Ok, %q message extracted, saved in %q", r.Source, jfn)
 				return nil
 			} else {
 				fmt.Printf("parsing error: %v\n", err)

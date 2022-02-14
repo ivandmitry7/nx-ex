@@ -2,258 +2,326 @@
 # Custom meta sequences
 # \_   (?:\s|\r?\n)
 # \M   JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC
-# Custom substitution macros
-# ${Y} Current year (last 2 digits) 
 ######################################################### 
-- # ODESA-NAVTEX
-  name: ODESA-NAVTEX
-  source: (?m)\b(ODESA-NAVTEX)[\s\r]*$
-  reason: (?m)^1\. ([[A-Z\s]*?)[\s\r]+$
-  times: 
-  - search: 1\. [A-Z\s\r]*\n(\d\d)(\d\d)(\d\d) (?:UTC )?([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${5}T${7}:${8}:00Z
-  - search: 1\. [A-Z\s\r]*\n(\d\d)(\d\d)(\d\d) (?:UTC )?([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d)\s+UTC ([A-Z]{3}) (\d+)
-    replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
-  - search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20${8}-${7}-${1}T${2}:${3}:00Z;20${8}-${7}-${4}T${5}:${6}:00Z
-  - search: 1\. [A-Z\s\r]*\n+FROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)[\s\r\n]+THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${6}T${7}:${8}:00Z
-  - 
-    # FROM 312100 UTC JAN THRU 282100 UTC FEB 22
-    search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
-    replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
-  - 
-    # 27-29 JAN, 03-05 FEB, 10-12 FEB 22\nFROM 0600 TO 1600 UTC
-    search: 1\. [A-Z\s\r]*\n(\d\d)-\d\d ([A-Z]{3}).*\d\d-(\d\d) ([A-Z]{3}) (\d\d)[\s\r]*\nFROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
-    replace: 20${5}-${2}-${1}T${6}:${7}:00Z;20${5}-${4}-${3}T${8}:${9}:00Z
+replacers:
   -
-    # 01 THRU 28 FEB 22 FROM 0500 TO 1700 UTC
-    # 25-26 JAN 22\nFROM 0000 TO 1600 UTC
-    search: 1\. [A-Z\s\r]*\n(\d\d)(?:-|\sTHRU\s)(\d\d) ([A-Z]{3}) (\d\d)[\s\r\n]*FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
-    replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
-  coords: 
+    search: [(JAN),(FEB),(MAR),(APR),(MAY),(JUN),(JUL),(AUG),(SEP),(OCT),(NOV),(DEC)]
+    replace: (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)
+  -
+    search: [\_]
+    replace: (?:\s|\r?\n)
   - 
-    # IN AREA BOUNDED BY
-    # 45-59.73N 030-19.87E
-    # 46-11.46N 030-59.93E
-    # 2. CANCEL THIS MSG 
-    type: polygon
-    search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d(?:[\.-]\d+)?\s?[NS]\s+0?\d\d-\d\d(?:[\.-]\d+)?\s?[EW]( AND COASTLINE)?\r?\n)+)2. CANCEL
+    search: [\n]
+    replace: \r?\n
   - 
-    # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
-    type: circle
-    search: (?m)^WITHIN (\d\d) CABLES OF (\d\d-\d\d.\d)\s?([NS])\s+(0\d\d-\d\d.\d\d)\s?([EW])\r?$
-    replace: ${1}Cr${2}${3} ${4}${5}
-  - 
-    # AREAS BOUNDED BY
-    # A. 45-44.5N 031-33.0E
-    #    45-45.3N 032-01.0E
-    # B. 45-24.0N 031-34.0E
-    #    45-24.0N 032-00.0E
-    # 2. CANCEL THIS MSG 
-    type: polygons
-    search: AREAS BOUNDED BY\r?\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\r?\n)+)2. CANCEL
+    search: [\$]
+    replace: \r?$
+parsers:
+  - # Common
+    name: Common
+    source: (?m)^([A-Z]+) NAV WARN\s\d+\/\d\d\.?$
+    reason: '[A-Z]{3} NAV WARN \d+/\d\d\.?\r?\n(?:\r?\n)?(?:.*\r?\n)+(\w+ \w+)(?:\s|\s?\r?\n)\d'
+    times: 
+    -
+      # PET NAV WARN 016/22
+      # EASTERN GULF OF FINLAND
+      # SHIPS EXERCISES 17 THRU 22 JAN 0500 TO 1600 UTC
+      search: '[A-Z]{3} NAV WARN \d+\/(\d\d)\.?\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)(?:\sTHRU\s|-)(\d+) (JAN) (\d+)(\d\d)(?:\sTO\s|-)(\d+)(\d\d) UTC'
+      replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T${7}:${8}:00Z
+    -
+      # LIT NAV WARN 002/22
+      # SOUTH-EASTERN BALTIC
+      # LIT COAST
+      # MILITARY EXERCISES
+      # 162200-232200 UTC JAN
+      search: '[A-Z]{3} NAV WARN \d\d\d\/(\d\d)\r?\n(?:\r?\n)?(?:.*\r?\n)+\w+ \w+(?:\s|\r?\n)(\d\d)(\d\d)(\d\d)-(\d\d)(\d\d)(\d\d) UTC (JAN)'
+      replace: 20${1}-${8}-${2}T${3}:${4}:00Z;20${1}-${8}-${5}T${6}:${7}:00Z
+    -
+      # PET NAV WARN 036/22.
+      # EASTERN GULF OF FINLAND.
+      # SHIPS EXERCISES 
+      # 31 JAN THRU 05 FEB 0500 TO 1600 UTC
+      # IN AREA TEMP DANGEROUS TO SHIPPING
+      search: '[A-Z]{3} NAV WARN \d\d\d\/(\d\d)\.?\r?\n(?:\r?\n)?(?:.*\r?\n)+\w+ \w+(?:\s|\s?\r?\n)(\d+) (JAN) THRU (\d+) (JAN) (\d+)(\d\d) TO (\d+)(\d\d) UTC'
+      replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${7}:${8}:00Z
+    coords: 
+    - 
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # 60-00.5N 027-16.5E 60-05.4N 027-34.0E
+      # 59-53.0N 027-48.0E 59-48.0N 027-31.0E
+      # CANCEL THIS MSG  291700 UTC JAN
+      type: polygon
+      search: DANGEROUS TO SHIPPING:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\.?\s?\r?\n))+)CANCEL
+    -
+      # IN AREA EYD-17 BOUNDED BY:
+      # 55-36.98N 020-45.88E
+      # 55-38.13N 021-09.00E
+      # 55-31.40N 021-13.30E
+      # 55-24.98N 020-59.88E
+      # 55-21.98N 020-45.88E
+      # 55-24.98N 020-41.88E
+      # 55-33.98N 020-41.88E.
+      # AREA TEMP DANGEROUS TO SHIPPING.
+      type: polygon
+      search: IN AREA .* BOUNDED BY:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\s?\.?\r?\n))+)AREA
+    -
+      # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # KR-105 CENTERED IN 60-06N 029-08E
+      # CANCEL THIS MSG 291700 UTC JAN
+      type: circle
+      search: DANGEROUS TO SHIPPING(?:\s|\r?\n)([B|K])R-(\d+)\s(?:\r?\n)?CENTERED (?:IN )?(\d+-\d+(?:[\.,]\d+)?[NS]) 0(\d+-\d+(?:[\.,]\d+)?[EW])\.?\r?\nCANCEL
+      replace: ${2}${1}r${3} ${4}
 
-- # NOVOROSSIYSK
-  name: NOVOROSSIYSK
-  source: (?m)^.*(NOVOROSSIYSK) \d+\r?$
-  reason: (?m)^1. (\w+ \w+) \d.*\r?$
-  times: 
-  - 
-    # 1. NAVAL TRAINING 01 THRU 31 JAN 22 FROM 0500 TO 1700 UTC DAILY
-    search: 1. \D+ (\d+) THRU (\d+) ([A-Z]{3}) (\d+) FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
-    replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
-  -
-    # 1. FIRING EXERCISES 12 13 19 20 26 AND 27 JAN 22 FROM 0900 TO 1500
-    # UTC NAVIGATION TEMPORARILY PROHIBITED IN AREA BOUNDED BY 45-03N
-    search: 1. \D+ (\d+) (?:\d+\s)+AND\_(\d+)\_(\M)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
-    replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
-  - 
-    # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 1400
-    # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
-    search: 1. \D+ (\d+) .*?\_(\M)\_(\d\d)\_.*\_(\d+)\_(\M)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
-    replace: 20${3}-${2}-${1}T${7}:${8}:00Z;20${6}-${5}-${4}T${9}:${10}:00Z
-  coords: 
-  - 
-    # EXCEPT SUNDAYS NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
-    # 45-03.5N 036-17.0E 44-57.5N 036-23.0E 44-45.0N 036-24.0E 44-45.0N
-    # 035-50.0E 45-00.0N 035-50.0E AND COASTLINE
-    # 2. CANCEL THIS MESSAGE 311800 UTC JAN 22
-    type: polygon
-    search: AREA BOUNDED BY(?:\s|\r\n)?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)(?:\sAND COASTLINE)?\r?\n2. CANCEL
-  -
-    # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 0400
-    # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROCS IN AREAS BOUNDED BY
-    # A. 44-34.5N 037-42.0E 44-31.5N 037-50.0E 44-20.5N 037-48.0E
-    # 44-24.0N 037-39.5E
-    # B. 44-52.5N 037-11.8E 44-53.4N 037-15.4E 44-44.4N 037-19.4E
-    # 44-43.5N 037-15.8E
-    # 2. CANCEL THIS MESSAGE 151900 UTC JAN 22
-    type: polygons
-    search: (?s)AREAS BOUNDED BY((?:\r?\n(?:[A-Z]\.(?:(?:\s|\r?\n)\d+-\d+\.\d+\s?[NSEW])+))+)\r?\n2\. CANCEL
+  - # ODESA-NAVTEX
+    name: ODESA-NAVTEX
+    source: (?m)\b(ODESA-NAVTEX)[\s\r]*$
+    reason: (?m)^1\. ([[A-Z\s]*?)[\s\r]+$
+    times: 
+    - search: 1\. [A-Z\s\r]*\n(\d\d)(\d\d)(\d\d) (?:UTC )?([A-Z]{3}) (\d+) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+      replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${5}T${7}:${8}:00Z
+    - search: 1\. [A-Z\s\r]*\n(\d\d)(\d\d)(\d\d) (?:UTC )?([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d)\s+UTC ([A-Z]{3}) (\d+)
+      replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
+    - search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+      replace: 20${8}-${7}-${1}T${2}:${3}:00Z;20${8}-${7}-${4}T${5}:${6}:00Z
+    - search: 1\. [A-Z\s\r]*\n+FROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)[\s\r\n]+THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+      replace: 20${5}-${4}-${1}T${2}:${3}:00Z;20${10}-${9}-${6}T${7}:${8}:00Z
+    - 
+      # FROM 312100 UTC JAN THRU 282100 UTC FEB 22
+      search: 1\. [A-Z\s\r]*\nFROM (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) THRU (\d\d)(\d\d)(\d\d) UTC ([A-Z]{3}) (\d+)
+      replace: 20${9}-${4}-${1}T${2}:${3}:00Z;20${9}-${8}-${5}T${6}:${7}:00Z
+    - 
+      # 27-29 JAN, 03-05 FEB, 10-12 FEB 22\nFROM 0600 TO 1600 UTC
+      search: 1\. [A-Z\s\r]*\n(\d\d)-\d\d ([A-Z]{3}).*\d\d-(\d\d) ([A-Z]{3}) (\d\d)[\s\r]*\nFROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+      replace: 20${5}-${2}-${1}T${6}:${7}:00Z;20${5}-${4}-${3}T${8}:${9}:00Z
+    -
+      # 01 THRU 28 FEB 22 FROM 0500 TO 1700 UTC
+      # 25-26 JAN 22\nFROM 0000 TO 1600 UTC
+      search: 1\. [A-Z\s\r]*\n(\d\d)(?:-|\sTHRU\s)(\d\d) ([A-Z]{3}) (\d\d)[\s\r\n]*FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+      replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+    coords: 
+    - 
+      # IN AREA BOUNDED BY
+      # 45-59.73N 030-19.87E
+      # 46-11.46N 030-59.93E
+      # 2. CANCEL THIS MSG 
+      type: polygon
+      search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d(?:[\.-]\d+)?\s?[NS]\s+0?\d\d-\d\d(?:[\.-]\d+)?\s?[EW]( AND COASTLINE)?\r?\n)+)2. CANCEL
+    - 
+      # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
+      type: circle
+      search: (?m)^WITHIN (\d\d) CABLES OF (\d\d-\d\d.\d)\s?([NS])\s+(0\d\d-\d\d.\d\d)\s?([EW])\r?$
+      replace: ${1}Cr${2}${3} ${4}${5}
+    - 
+      # AREAS BOUNDED BY
+      # A. 45-44.5N 031-33.0E
+      #    45-45.3N 032-01.0E
+      # B. 45-24.0N 031-34.0E
+      #    45-24.0N 032-00.0E
+      # 2. CANCEL THIS MSG 
+      type: polygons
+      search: AREAS BOUNDED BY\r?\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\r?\n)+)2. CANCEL
 
-- # KALININGRAD
-  name: KALININGRAD
-  source: (?m)^(KALININGRAD) NAV WARN\s\d+/\d+\r?$
-  reason: KALININGRAD NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(\w+ \w+) \d.*\r?\n
-  times: 
-  - 
-    # SOUTHEASTERN BALTIC
-    # SHIPS EXERCISES 10-15 JAN 0500-1600 UTC
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    search: SOUTHEASTERN BALTIC\r?\n\w+ \w+ (\d+)-(\d+) (\M) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
-    replace: 20${Y}-${3}-${1}T${4}:${5}:00Z;20${Y}-${3}-${2}T${6}:${7}:00Z
-  -
-    # SOUTHEASTERN BALTIC
-    # SHIPS EXERCISES 31 JAN THRU 05 FEB 0500 TO 1600 UTC
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    search: KALININGRAD NAV WARN \d\d\d\/(\d\d)\r?\n(?:\r?\n)?(?:.*\r?\n)\w+ \w+ (\d+) (JAN) THRU (\d+) (FEB) (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
-    replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${8}:${9}:00Z
-  coords: 
-  - 
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    # BR-161 CENTERED 55-06N 019-50E
-    # CANCEL THIS MSG  151700 UTC JAN
-    type: circle
-    search: DANGEROUS TO SHIPPING\r?\n([B|K])R-(\d+) CENTERED (\d+-\d+[NS]) 0(\d+-\d+[EW])\r?\nCANCEL
-    replace: ${2}${1}r${3} ${4}
-  - 
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    # 55-32.0N 019-01.6E 55-32.0N 019-50.0E
-    # 55-03.0N 019-35.0E 54-46.4N 019-35.0E
-    # 54-50.3N 019-20.3E 55-11.5N 019-09.2E
-    # 55-20.0N 019-04.6E
-    # CANCEL THIS MSG 151700 UTC JAN
-    type: polygon
-    search: DANGEROUS TO SHIPPING\_?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)\r?\nCANCEL
+  - # NOVOROSSIYSK
+    name: NOVOROSSIYSK
+    source: (?m)^.*(NOVOROSSIYSK) \d+\r?$
+    reason: (?m)^1. (\w+ \w+) \d.*\r?$
+    times: 
+    - 
+      # 1. NAVAL TRAINING 01 THRU 31 JAN 22 FROM 0500 TO 1700 UTC DAILY
+      search: 1. \D+ (\d+) THRU (\d+) ([A-Z]{3}) (\d+) FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+      replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+    -
+      # 1. FIRING EXERCISES 12 13 19 20 26 AND 27 JAN 22 FROM 0900 TO 1500
+      # UTC NAVIGATION TEMPORARILY PROHIBITED IN AREA BOUNDED BY 45-03N
+      search: 1. \D+ (\d+) (?:\d+\s)+AND\_(\d+)\_(JAN)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
+      replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+    - 
+      # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 1400
+      # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
+      search: 1. \D+ (\d+) .*?\_(JAN)\_(\d\d)\_.*\_(\d+)\_(JAN)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
+      replace: 20${3}-${2}-${1}T${7}:${8}:00Z;20${6}-${5}-${4}T${9}:${10}:00Z
+    coords: 
+    - 
+      # EXCEPT SUNDAYS NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
+      # 45-03.5N 036-17.0E 44-57.5N 036-23.0E 44-45.0N 036-24.0E 44-45.0N
+      # 035-50.0E 45-00.0N 035-50.0E AND COASTLINE
+      # 2. CANCEL THIS MESSAGE 311800 UTC JAN 22
+      type: polygon
+      search: AREA BOUNDED BY(?:\s|\r\n)?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)(?:\sAND COASTLINE)?\r?\n2. CANCEL
+    -
+      # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 0400
+      # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROCS IN AREAS BOUNDED BY
+      # A. 44-34.5N 037-42.0E 44-31.5N 037-50.0E 44-20.5N 037-48.0E
+      # 44-24.0N 037-39.5E
+      # B. 44-52.5N 037-11.8E 44-53.4N 037-15.4E 44-44.4N 037-19.4E
+      # 44-43.5N 037-15.8E
+      # 2. CANCEL THIS MESSAGE 151900 UTC JAN 22
+      type: polygons
+      search: (?s)AREAS BOUNDED BY((?:\r?\n(?:[A-Z]\.(?:(?:\s|\r?\n)\d+-\d+\.\d+\s?[NSEW])+))+)\r?\n2\. CANCEL
 
-- # LITHUANIAN
-  name: LITHUANIAN
-  source: (?m)^(LITHUANIAN) NAV WARN\s\d+\/\d+\r?$
-  reason: LITHUANIAN NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(\w+ \w+) \d.*\r?\n
-  times: 
-  - 
-    # LITHUANIAN NAV WARN 004/22
-    # SOUTH-EASTERN BALTIC. LITHUANIAN COAST. 
-    # MILITARY EXERCISES 1 FEB 0700-1500 UTC
-    # IN AREA EYD-17 BOUNDED BY:
-    search: LITHUANIAN NAV WARN \d\d\d\/(\d\d)\r?\n\_?(?:.*\r?\n)\w+ \w+ (\d+) (\M) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
-    replace: 20${1}-${3}-${2}T${4}:${5}:00Z;20${1}-${3}-${2}T${6}:${7}:00Z
-  -
-    # LITHUANIAN NAV WARN 003/22
-    # SOUTH-EASTERN BALTIC. LITHUANIAN COAST - MILITARY EXERCISES
-    # MILITARY EXERCISES 250800 TO 251400 UTC JAN
-    # AND 260800 TO 261400 UTC JAN
-    # IN AREA EYD-17 BOUNDED BY:
-    search: (?s)LITHUANIAN NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)\w+ \w+ (\d\d)(\d\d)(\d\d) TO \d\d\d\d\d\d UTC (\M).*TO (\d\d)(\d\d)(\d\d) UTC (\M)
-    replace: 20${1}-${5}-${2}T${3}:${4}:00Z;20${1}-${9}-${6}T${7}:${8}:00Z
-  coords: 
-  - 
-    # IN AREA EYD-17 BOUNDED BY:
-    # 55-36.98N 020-45.88E
-    # 55-38.13N 021-09.00E
-    # 55-31.40N 021-13.30E
-    # 55-24.98N 020-59.88E
-    # 55-21.98N 020-45.88E
-    # 55-24.98N 020-41.88E
-    # 55-33.98N 020-41.88E.
-    # AREA TEMPORARILY DANGEROUS TO SHIPPING.
-    type: polygon
-    search: IN AREA (?:.*)BOUNDED BY:\r?\n((?:\d+-\d+\.\d+[NWES](?:\s|\r?\n|\.))+)\r?\nAREA
+  - # KALININGRAD
+    name: KALININGRAD
+    source: (?m)^(KALININGRAD) NAV WARN\s\d+/\d+\r?$
+    reason: KALININGRAD NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(\w+ \w+) \d.*\r?\n
+    times: 
+    - 
+      # SOUTHEASTERN BALTIC
+      # SHIPS EXERCISES 10-15 JAN 0500-1600 UTC
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      search: SOUTHEASTERN BALTIC\r?\n\w+ \w+ (\d+)-(\d+) (JAN) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
+      replace: 20${Y}-${3}-${1}T${4}:${5}:00Z;20${Y}-${3}-${2}T${6}:${7}:00Z
+    -
+      # SOUTHEASTERN BALTIC
+      # SHIPS EXERCISES 31 JAN THRU 05 FEB 0500 TO 1600 UTC
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      search: KALININGRAD NAV WARN \d\d\d\/(\d\d)\r?\n(?:\r?\n)?(?:.*\r?\n)\w+ \w+ (\d+) (JAN) THRU (\d+) (FEB) (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
+      replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${8}:${9}:00Z
+    coords: 
+    - 
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # BR-161 CENTERED 55-06N 019-50E
+      # CANCEL THIS MSG  151700 UTC JAN
+      type: circle
+      search: DANGEROUS TO SHIPPING\r?\n([B|K])R-(\d+) CENTERED (\d+-\d+[NS]) 0(\d+-\d+[EW])\r?\nCANCEL
+      replace: ${2}${1}r${3} ${4}
+    - 
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # 55-32.0N 019-01.6E 55-32.0N 019-50.0E
+      # 55-03.0N 019-35.0E 54-46.4N 019-35.0E
+      # 54-50.3N 019-20.3E 55-11.5N 019-09.2E
+      # 55-20.0N 019-04.6E
+      # CANCEL THIS MSG 151700 UTC JAN
+      type: polygon
+      search: DANGEROUS TO SHIPPING\_?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)\r?\nCANCEL
 
-- # PETERSBURG
-  name: PETERSBURG
-  source: (?m)^(PETERSBURG) NAV WARN\s\d+\/\d+\r?$
-  reason: PETERSBURG NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(?:\s+)?(\w+ \w+) (?:\r?\n)?\d.*\r?\n
-  times: 
-  - 
-    # PETERSBURG NAV WARN 027/22
-    # EASTERN GULF OF FINLAND
-    # SHIPS EXERCISES 24-29 JAN 0500-1600 UTC
-    search: PETERSBURG NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)-\s?(\d+) (\M) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
-    replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T${7}:${8}:00Z
-  -
-    # PETERSBURG NAV WARN 026/22
-    # EASTERN GULF OF FINLAND
-    # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
-    search: PETERSBURG NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)-\s?(\d+) (\M) (\d\d)(\d\d)-(\d)(\d\d) UTC
-    replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T0${7}:${8}:00Z
-  -
-    # PETERSBURG NAV WARN 036/22
-    # EASTERN GULF OF FINLAND
-    # SHIPS EXERCISES 31 JAN THRU 05 FEB 0500 TO 1600 UTC
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    search: PETERSBURG NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+) (\M) THRU (\d+) (\M) (\d\d)(\d\d) TO (\d\d)(\d\d)
-    replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${7}:${8}:00Z
-  coords: 
-  - 
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    # 60-00.5N 027-16.5E 60-05.4N 027-34.0E
-    # 59-53.0N 027-48.0E 59-48.0N 027-31.0E
-    # CANCEL THIS MSG  291700 UTC JAN
-    type: polygon
-    search: DANGEROUS TO SHIPPING:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\s?\r?\n))+)CANCEL
-    # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    # KR-105 CENTERED IN 60-06N 029-08E
-    # CANCEL THIS MSG 291700 UTC JAN
-  -
-    type: circle
-    search: DANGEROUS TO SHIPPING\r?\n([B|K])R-(\d+) CENTERED IN (\d+-\d+[NS]) 0(\d+-\d+[EW])\.?\r?\nCANCEL
-    replace: ${2}${1}r${3} ${4}
+  - # LITHUANIAN
+    name: LITHUANIAN
+    source: (?m)^(LITHUANIAN) NAV WARN\s\d+\/\d+\r?$
+    reason: LITHUANIAN NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(\w+ \w+) \d.*\r?\n
+    times: 
+    - 
+      # LITHUANIAN NAV WARN 004/22
+      # SOUTH-EASTERN BALTIC. LITHUANIAN COAST. 
+      # MILITARY EXERCISES 1 FEB 0700-1500 UTC
+      # IN AREA EYD-17 BOUNDED BY:
+      search: LITHUANIAN NAV WARN \d\d\d\/(\d\d)\r?\n\_?(?:.*\r?\n)\w+ \w+ (\d+) (JAN) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
+      replace: 20${1}-${3}-${2}T${4}:${5}:00Z;20${1}-${3}-${2}T${6}:${7}:00Z
+    -
+      # LITHUANIAN NAV WARN 003/22
+      # SOUTH-EASTERN BALTIC. LITHUANIAN COAST - MILITARY EXERCISES
+      # MILITARY EXERCISES 250800 TO 251400 UTC JAN
+      # AND 260800 TO 261400 UTC JAN
+      # IN AREA EYD-17 BOUNDED BY:
+      search: (?s)LITHUANIAN NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)\w+ \w+ (\d\d)(\d\d)(\d\d) TO \d\d\d\d\d\d UTC (JAN).*TO (\d\d)(\d\d)(\d\d) UTC (FEB)
+      replace: 20${1}-${5}-${2}T${3}:${4}:00Z;20${1}-${9}-${6}T${7}:${8}:00Z
+    coords: 
+    - 
+      # IN AREA EYD-17 BOUNDED BY:
+      # 55-36.98N 020-45.88E
+      # 55-38.13N 021-09.00E
+      # 55-31.40N 021-13.30E
+      # 55-24.98N 020-59.88E
+      # 55-21.98N 020-45.88E
+      # 55-24.98N 020-41.88E
+      # 55-33.98N 020-41.88E.
+      # AREA TEMPORARILY DANGEROUS TO SHIPPING.
+      type: polygon
+      search: IN AREA (?:.*)BOUNDED BY:\r?\n((?:\d+-\d+\.\d+[NWES](?:\s|\r?\n|\.))+)\r?\nAREA
 
-- # KAL/LIT/PET
-  name: KAL-LIT-PET
-  source: (?m)^([A-Z]{3}) NAV WARN\s\d+\/\d\d\.?\r?$
-  reason: '[A-Z]{3} NAV WARN \d+/\d\d\.?\r?\n(?:\r?\n)?(?:.*\r?\n)+(\w+ \w+)(?:\s|\s?\r?\n)\d'
-  times: 
-  -
-    # PET NAV WARN 016/22
-    # EASTERN GULF OF FINLAND
-    # SHIPS EXERCISES 17 THRU 22 JAN 0500 TO 1600 UTC
-    search: '[A-Z]{3} NAV WARN \d+\/(\d\d)\.?\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)(?:\sTHRU\s|-)(\d+) (\M) (\d+)(\d\d)(?:\sTO\s|-)(\d+)(\d\d) UTC'
-    replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T${7}:${8}:00Z
-  -
-    # LIT NAV WARN 002/22
-    # SOUTH-EASTERN BALTIC
-    # LIT COAST
-    # MILITARY EXERCISES
-    # 162200-232200 UTC JAN
-    search: '[A-Z]{3} NAV WARN \d\d\d\/(\d\d)\r?\n(?:\r?\n)?(?:.*\r?\n)+\w+ \w+(?:\s|\r?\n)(\d\d)(\d\d)(\d\d)-(\d\d)(\d\d)(\d\d) UTC (\M)'
-    replace: 20${1}-${8}-${2}T${3}:${4}:00Z;20${1}-${8}-${5}T${6}:${7}:00Z
-  -
-    # PET NAV WARN 036/22.
-    # EASTERN GULF OF FINLAND.
-    # SHIPS EXERCISES 
-    # 31 JAN THRU 05 FEB 0500 TO 1600 UTC
-    # IN AREA TEMP DANGEROUS TO SHIPPING
-    search: '[A-Z]{3} NAV WARN \d\d\d\/(\d\d)\.?\r?\n(?:\r?\n)?(?:.*\r?\n)+\w+ \w+(?:\s|\s?\r?\n)(\d+) (\M) THRU (\d+) (\M) (\d+)(\d\d) TO (\d+)(\d\d) UTC'
-    replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${7}:${8}:00Z
-  coords: 
-  - 
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    # 60-00.5N 027-16.5E 60-05.4N 027-34.0E
-    # 59-53.0N 027-48.0E 59-48.0N 027-31.0E
-    # CANCEL THIS MSG  291700 UTC JAN
-    type: polygon
-    search: DANGEROUS TO SHIPPING:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\.?\s?\r?\n))+)CANCEL
-  -
-    # IN AREA EYD-17 BOUNDED BY:
-    # 55-36.98N 020-45.88E
-    # 55-38.13N 021-09.00E
-    # 55-31.40N 021-13.30E
-    # 55-24.98N 020-59.88E
-    # 55-21.98N 020-45.88E
-    # 55-24.98N 020-41.88E
-    # 55-33.98N 020-41.88E.
-    # AREA TEMP DANGEROUS TO SHIPPING.
-    type: polygon
-    search: IN AREA .* BOUNDED BY:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\s?\.?\r?\n))+)AREA
-  -
-    # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
-    # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
-    # KR-105 CENTERED IN 60-06N 029-08E
-    # CANCEL THIS MSG 291700 UTC JAN
-    type: circle
-    search: DANGEROUS TO SHIPPING(?:\s|\r?\n)([B|K])R-(\d+)\s(?:\r?\n)?CENTERED (?:IN )?(\d+-\d+(?:[\.,]\d+)?[NS]) 0(\d+-\d+(?:[\.,]\d+)?[EW])\.?\r?\nCANCEL
-    replace: ${2}${1}r${3} ${4}
+  - # PETERSBURG
+    name: PETERSBURG
+    source: (?m)^(PETERSBURG) NAV WARN\s\d+\/\d+\r?$
+    reason: PETERSBURG NAV WARN \d\d\d\/\d\d\r?\n(?:\r?\n)?.*\r?\n(?:\s+)?(\w+ \w+) (?:\r?\n)?\d.*\r?\n
+    times: 
+    - 
+      # PETERSBURG NAV WARN 027/22
+      # EASTERN GULF OF FINLAND
+      # SHIPS EXERCISES 24-29 JAN 0500-1600 UTC
+      search: PETERSBURG NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)-\s?(\d+) (JAN) (\d\d)(\d\d)-(\d\d)(\d\d) UTC
+      replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T${7}:${8}:00Z
+    -
+      # PETERSBURG NAV WARN 026/22
+      # EASTERN GULF OF FINLAND
+      # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
+      search: PETERSBURG NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)-\s?(\d+) (JAN) (\d\d)(\d\d)-(\d)(\d\d) UTC
+      replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T0${7}:${8}:00Z
+    -
+      # PETERSBURG NAV WARN 036/22
+      # EASTERN GULF OF FINLAND
+      # SHIPS EXERCISES 31 JAN THRU 05 FEB 0500 TO 1600 UTC
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      search: PETERSBURG NAV WARN \d\d\d\/(\d\d)\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+) (JAN) THRU (\d+) (FEB) (\d\d)(\d\d) TO (\d\d)(\d\d)
+      replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${7}:${8}:00Z
+    coords: 
+    - 
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # 60-00.5N 027-16.5E 60-05.4N 027-34.0E
+      # 59-53.0N 027-48.0E 59-48.0N 027-31.0E
+      # CANCEL THIS MSG  291700 UTC JAN
+      type: polygon
+      search: DANGEROUS TO SHIPPING:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\s?\r?\n))+)CANCEL
+      # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # KR-105 CENTERED IN 60-06N 029-08E
+      # CANCEL THIS MSG 291700 UTC JAN
+    -
+      type: circle
+      search: DANGEROUS TO SHIPPING\r?\n([B|K])R-(\d+) CENTERED IN (\d+-\d+[NS]) 0(\d+-\d+[EW])\.?\r?\nCANCEL
+      replace: ${2}${1}r${3} ${4}
+
+  - # KAL/LIT/PET
+    name: KAL-LIT-PET
+    source: (?m)^([A-Z]{3}) NAV WARN\s\d+\/\d\d\.?\r?$
+    reason: '[A-Z]{3} NAV WARN \d+/\d\d\.?\r?\n(?:\r?\n)?(?:.*\r?\n)+(\w+ \w+)(?:\s|\s?\r?\n)\d'
+    times: 
+    -
+      # PET NAV WARN 016/22
+      # EASTERN GULF OF FINLAND
+      # SHIPS EXERCISES 17 THRU 22 JAN 0500 TO 1600 UTC
+      search: '[A-Z]{3} NAV WARN \d+\/(\d\d)\.?\r?\n(?:.*\r?\n)(?:\s+)?\w+ \w+(?:\s\r?\n)?\s?(\d+)(?:\sTHRU\s|-)(\d+) (JAN) (\d+)(\d\d)(?:\sTO\s|-)(\d+)(\d\d) UTC'
+      replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T${7}:${8}:00Z
+    -
+      # LIT NAV WARN 002/22
+      # SOUTH-EASTERN BALTIC
+      # LIT COAST
+      # MILITARY EXERCISES
+      # 162200-232200 UTC JAN
+      search: '[A-Z]{3} NAV WARN \d\d\d\/(\d\d)\r?\n(?:\r?\n)?(?:.*\r?\n)+\w+ \w+(?:\s|\r?\n)(\d\d)(\d\d)(\d\d)-(\d\d)(\d\d)(\d\d) UTC (JAN)'
+      replace: 20${1}-${8}-${2}T${3}:${4}:00Z;20${1}-${8}-${5}T${6}:${7}:00Z
+    -
+      # PET NAV WARN 036/22.
+      # EASTERN GULF OF FINLAND.
+      # SHIPS EXERCISES 
+      # 31 JAN THRU 05 FEB 0500 TO 1600 UTC
+      # IN AREA TEMP DANGEROUS TO SHIPPING
+      search: '[A-Z]{3} NAV WARN \d\d\d\/(\d\d)\.?\r?\n(?:\r?\n)?(?:.*\r?\n)+\w+ \w+(?:\s|\s?\r?\n)(\d+) (JAN) THRU (\d+) (JAN) (\d+)(\d\d) TO (\d+)(\d\d) UTC'
+      replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${7}:${8}:00Z
+    coords: 
+    - 
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # 60-00.5N 027-16.5E 60-05.4N 027-34.0E
+      # 59-53.0N 027-48.0E 59-48.0N 027-31.0E
+      # CANCEL THIS MSG  291700 UTC JAN
+      type: polygon
+      search: DANGEROUS TO SHIPPING:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\.?\s?\r?\n))+)CANCEL
+    -
+      # IN AREA EYD-17 BOUNDED BY:
+      # 55-36.98N 020-45.88E
+      # 55-38.13N 021-09.00E
+      # 55-31.40N 021-13.30E
+      # 55-24.98N 020-59.88E
+      # 55-21.98N 020-45.88E
+      # 55-24.98N 020-41.88E
+      # 55-33.98N 020-41.88E.
+      # AREA TEMP DANGEROUS TO SHIPPING.
+      type: polygon
+      search: IN AREA .* BOUNDED BY:?\r?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\s?\.?\r?\n))+)AREA
+    -
+      # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
+      # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
+      # KR-105 CENTERED IN 60-06N 029-08E
+      # CANCEL THIS MSG 291700 UTC JAN
+      type: circle
+      search: DANGEROUS TO SHIPPING(?:\s|\r?\n)([B|K])R-(\d+)\s(?:\r?\n)?CENTERED (?:IN )?(\d+-\d+(?:[\.,]\d+)?[NS]) 0(\d+-\d+(?:[\.,]\d+)?[EW])\.?\r?\nCANCEL
+      replace: ${2}${1}r${3} ${4}
