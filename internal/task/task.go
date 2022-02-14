@@ -102,7 +102,7 @@ func (t *Task) processFile(filename string) error {
 	var r *parser.Result
 	for i, pc := range t.processors {
 		if pc.Check(msg) {
-			fmt.Printf("pattern %q dectected, parsing... ", t.cfg.Parsers[i].Name)
+			fmt.Printf("pattern %q dectected, ", t.cfg.Parsers[i].Name)
 			r, err = pc.Parse(msg)
 			if err == nil {
 				r.Commit()
@@ -112,7 +112,7 @@ func (t *Task) processFile(filename string) error {
 					fmt.Printf("unable to write result to file %q\n", jfn)
 					return err
 				}
-				fmt.Printf("Ok, %q message extracted\n", r.Source)
+				fmt.Printf("%q message extracted\n", r.Source)
 				return nil
 			} else {
 				fmt.Printf("parsing error: %v\n", err)

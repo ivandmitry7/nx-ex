@@ -41,14 +41,17 @@ func (c *Config) applyReplacers() {
 	}
 
 	replacer := strings.NewReplacer(list...)
-	for _, p := range c.Parsers {
+	for i := range c.Parsers {
+		p := &c.Parsers[i]
 		p.Source = replacer.Replace(p.Source)
 		p.Reason = replacer.Replace(p.Reason)
-		for _, t := range p.Times {
+		for j := range p.Times {
+			t := &p.Times[j]
 			t.Search = replacer.Replace(t.Search)
 			t.Replace = replacer.Replace(t.Replace)
 		}
-		for _, c := range p.Coords {
+		for j := range p.Coords {
+			c := &p.Coords[j]
 			c.Search = replacer.Replace(c.Search)
 			c.Replace = replacer.Replace(c.Replace)
 		}
