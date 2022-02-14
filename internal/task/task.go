@@ -112,7 +112,7 @@ func (t *Task) processFile(filename string) error {
 					fmt.Printf("unable to write result to file %q\n", jfn)
 					return err
 				}
-				fmt.Printf("Ok, %q message extracted, saved in %q", r.Source, jfn)
+				fmt.Printf("Ok, %q message extracted\n", r.Source)
 				return nil
 			} else {
 				fmt.Printf("parsing error: %v\n", err)
