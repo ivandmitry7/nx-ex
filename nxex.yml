@@ -12,7 +12,7 @@ replacers:
     replace: '>JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)'
   -
     search: [\_]
-    replace: (?:\s|\r?\n)
+    replace: '[\s\r]'
   - 
     search: [\n]
     replace: \r?\n
@@ -131,23 +131,18 @@ parsers:
 
   - # NOVOROSSIYSK
     name: NOVOROSSIYSK
-    source: (?m)^.*(NOVOROSSIYSK) \d+\r?$
-    reason: (?m)^1. (\w+ \w+) \d.*\r?$
+    source: (?m)^.*(NOVOROSSIYSK) \d+?$
+    reason: (?m)^1. (\w+ \w+) \d.*$
     times: 
     - 
-      # 1. NAVAL TRAINING 01 THRU 31 JAN 22 FROM 0500 TO 1700 UTC DAILY
-      search: 1. \D+ (\d+) THRU (\d+) ([A-Z]{3}) (\d+) FROM (\d\d)(\d\d) TO (\d\d)(\d\d) UTC
-      replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+      # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 1400
+      search: (?s)1. \D+ (?P<d0>\d+).*\_(?P<m0>DEC)\_(?P<y0>\d+).+\D(?P<d1>\d+) (?P<m1>JAN)\_(?P<y1>\d+)\_FROM\_(?P<h0>\d\d)(?P<n0>\d\d)\_TO\_(?P<h1>\d\d)(?P<n1>\d\d)\_UTC
     -
       # 1. FIRING EXERCISES 12 13 19 20 26 AND 27 JAN 22 FROM 0900 TO 1500
-      # UTC NAVIGATION TEMPORARILY PROHIBITED IN AREA BOUNDED BY 45-03N
-      search: 1. \D+ (\d+) (?:\d+\s)+AND\_(\d+)\_(JAN)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
-      replace: 20${4}-${3}-${1}T${5}:${6}:00Z;20${4}-${3}-${2}T${7}:${8}:00Z
+      search: (?s)1. \D+ (?P<d0>\d+).*\_(?P<d1>\d+) (?P<m0>JAN)\_(?P<y0>\d+)\_FROM\_(?P<h0>\d\d)(?P<n0>\d\d)\_TO\_(?P<h1>\d\d)(?P<n1>\d\d)\_UTC
     - 
-      # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 1400
-      # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
-      search: 1. \D+ (\d+) .*?\_(JAN)\_(\d\d)\_.*\_(\d+)\_(JAN)\_(\d\d)\_FROM\_(\d\d)(\d\d)\_TO\_(\d\d)(\d\d)\_UTC
-      replace: 20${3}-${2}-${1}T${7}:${8}:00Z;20${6}-${5}-${4}T${9}:${10}:00Z
+      # 1. NAVAL TRAINING 01 THRU 31 JAN 22 FROM 0500 TO 1700 UTC DAILY
+      search: (?s)1. \D+ (?P<d0>\d+).*\_(?P<d1>\d+)\_(?P<m0>JAN)\_(?P<y0>\d+)\_FROM\_(?P<h0>\d\d)(?P<n0>\d\d)\_TO\_(?P<h1>\d\d)(?P<n1>\d\d)\_UTC
     coords: 
     - 
       # EXCEPT SUNDAYS NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
