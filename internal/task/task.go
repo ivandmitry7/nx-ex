@@ -7,20 +7,48 @@ import (
 	"github.com/o-kos/nx-ex/internal/parser"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
 
 type Task struct {
-	cfg        *Config
+	cfg *Config
+	opt struct {
+		verbose bool
+		quiet   bool
+	}
 	processors []Processor
+	stats      map[string]int
 }
 
 func NewTask() *Task {
-	return &Task{}
+	return &Task{stats: map[string]int{}}
 }
 
 var ErrUndetectedPattern error = errors.New("unable to detect pattern")
+
+func printStats(stats map[string]int) {
+	type kv struct {
+		key   string
+		value int
+	}
+
+	var ss []kv
+	for k, v := range stats {
+		ss = append(ss, kv{k, v})
+	}
+
+	sort.Slice(
+		ss, func(i, j int) bool {
+			return ss[i].value > ss[j].value
+		},
+	)
+
+	for _, kv := range ss {
+		fmt.Printf("%-20s %8d\n", kv.key, kv.value)
+	}
+}
 
 func (t *Task) Execute(opts map[string]interface{}) error {
 	cfgPath := opts["--config"].(string)
@@ -30,6 +58,11 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 		return nil
 	}
 	t.cfg = cfg
+	t.opt.verbose = opts["--verbose"].(bool)
+	t.opt.quiet = opts["--quiet"].(bool)
+	if t.opt.quiet {
+		t.opt.verbose = false
+	}
 
 	for _, pc := range t.cfg.Parsers {
 		p, err := NewProcessor(&pc)
@@ -40,6 +73,9 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 		}
 	}
 
+	if t.opt.verbose {
+		fmt.Printf("Loaded %d message processors\n", len(t.processors))
+	}
 	mask := opts["<MASK>"].(string)
 	files, err := filepath.Glob(mask)
 	if err != nil {
@@ -49,7 +85,7 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 	if totalFiles == 0 {
 		return fmt.Errorf("unable to find files with mask %q\n", mask)
 	}
-	if totalFiles > 1 {
+	if totalFiles > 1 && !t.opt.quiet {
 		fmt.Printf("Found %d files\n", len(files))
 	}
 
@@ -57,7 +93,7 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 	okFiles := 0
 	badFiles := 0
 	for i, fn := range files {
-		if totalFiles > 1 {
+		if totalFiles > 1 && !t.opt.quiet {
 			fmt.Printf("%d/%d [%d%%] ", i+1, totalFiles, (i+1)*100/totalFiles)
 		}
 		err := t.processFile(fn)
@@ -74,7 +110,10 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 		if badFiles > 0 {
 			badMsg = fmt.Sprintf("%d files has errors, ", badFiles)
 		}
-		fmt.Printf("Total patterns detected in %d files, %selapsed time %s", okFiles, badMsg, time.Since(start))
+		fmt.Printf("Total patterns detected in %d files, %selapsed time %s\n", okFiles, badMsg, time.Since(start))
+		if t.opt.verbose {
+			printStats(t.stats)
+		}
 	}
 	return nil
 }
@@ -91,7 +130,9 @@ func normalizeCRLF(str string) string {
 }
 
 func (t *Task) processFile(filename string) error {
-	fmt.Printf("Process file %q... ", filename)
+	if !t.opt.quiet {
+		fmt.Printf("Process file %q... ", filename)
+	}
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Printf("unable to read file %q: %v\n", filename, err)
@@ -102,7 +143,9 @@ func (t *Task) processFile(filename string) error {
 	var r *parser.Result
 	for i, pc := range t.processors {
 		if pc.Check(msg) {
-			fmt.Printf("pattern %q dectected, ", t.cfg.Parsers[i].Name)
+			if !t.opt.quiet {
+				fmt.Printf("pattern %q dectected, ", t.cfg.Parsers[i].Name)
+			}
 			r, err = pc.Parse(msg)
 			if err == nil {
 				r.Commit()
@@ -112,7 +155,12 @@ func (t *Task) processFile(filename string) error {
 					fmt.Printf("unable to write result to file %q\n", jfn)
 					return err
 				}
-				fmt.Printf("%q message extracted\n", r.Source)
+				if !t.opt.quiet {
+					fmt.Printf("%q message extracted\n", r.Source)
+				}
+
+				count := t.stats[r.Source]
+				t.stats[r.Source] = count + 1
 				return nil
 			} else {
 				fmt.Printf("parsing error: %v\n", err)

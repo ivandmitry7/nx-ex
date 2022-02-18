@@ -18,8 +18,8 @@ Arguments:
 Options:
   -h --help              show this help message and exit
   --version              show version and exit
-  -v --verbose           print status messages
-  -q --quiet             report only file names
+  -v --verbose           print extra process messages
+  -q --quiet             report minimal info
   -r --recursive         recursive process nested directories
   -c NAME --config=NAME  config file name with parsing rules [default: ./nxex.yml]
   --out-dir=DIR          dir for save JSON results [default: ./]
