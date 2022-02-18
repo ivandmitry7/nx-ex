@@ -42,7 +42,7 @@ func TestResult_makeID(t *testing.T) {
 	}
 	assert.Equal(
 		t,
-		"ODESA-NAVTEX#NAVAL-TRAINING/2021-12-01T00:00:00Z...2022-03-01T00:00:00Z[[44-34.5N 37-42.0E, 44-31.5N 37-50.0E, 44-20.5N 37-48.0E]]",
+		"NAVAL-TRAINING/2021-12-01T00:00:00Z...2022-03-01T00:00:00Z[[44-34.5N 37-42.0E, 44-31.5N 37-50.0E, 44-20.5N 37-48.0E]]",
 		r.makeID(),
 	)
 }
@@ -59,5 +59,5 @@ func TestResult_Commit(t *testing.T) {
 		},
 	}
 	r.Commit()
-	assert.Equal(t, "fff4bd10108fe516bf59d1b3cd4d6fb0", r.Hash)
+	assert.Equal(t, "1ecc39528fda4feff00917526c22ac63", r.Hash)
 }

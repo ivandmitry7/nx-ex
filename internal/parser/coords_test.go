@@ -21,13 +21,12 @@ WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
 2. CANCEL THIS MSG 312200 UTC JAN 22
 NNN`
 
-	search := `(?m)^WITHIN (\d\d) CABLES OF (\d\d-\d\d.\d)\s?([NS])\s+(0\d\d-\d\d.\d\d)\s?([EW])\r?$`
-	replace := `${1}Cr${2}${3} ${4}${5}`
+	search := `(?m)^WITHIN (?P<r>\d+) (?P<t>C)ABLES OF (?P<x>\d\d-\d\d.\d\s?[NS])\s+(?P<y>0\d\d-\d\d.\d\d\s?[EW])$`
 
 	re, err := regexp.Compile(search)
 	require.NoError(t, err)
 
-	area, err := ParseCoords(msg, "circle", re, replace)
+	area, err := ParseCoords(msg, "circle", re)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(area))
 	assert.Equal(t, "circle", area[0].Type)
@@ -59,7 +58,7 @@ NNN`
 	re, err := regexp.Compile(search)
 	require.NoError(t, err)
 
-	area, err := ParseCoords(msg, "polygon", re, "")
+	area, err := ParseCoords(msg, "polygon", re)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(area))
 	assert.Equal(t, "polygon", area[0].Type)
@@ -94,7 +93,7 @@ NNN`
 	re, err := regexp.Compile(search)
 	require.NoError(t, err)
 
-	area, err := ParseCoords(msg, "polygons", re, "")
+	area, err := ParseCoords(msg, "polygons", re)
 	require.NoError(t, err)
 	require.Equal(t, 2, len(area))
 	assert.Equal(t, "polygon", area[0].Type)

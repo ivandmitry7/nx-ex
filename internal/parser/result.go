@@ -42,8 +42,8 @@ func (r *Result) makeID() string {
 	as = strings.TrimSuffix(as, ", ")
 
 	id := fmt.Sprintf(
-		"%s#%s/%s...%s[%s]",
-		r.Source, r.Reason,
+		"%s/%s...%s[%s]",
+		r.Reason,
 		time.Unix(r.Date.Beg, 0).UTC().Format(time.RFC3339),
 		time.Unix(r.Date.End, 0).UTC().Format(time.RFC3339),
 		as,
