@@ -16,13 +16,11 @@ type ParserCfg struct {
 	Source string
 	Reason string
 	Times  []struct {
-		Search  string
-		Replace string
+		Search string
 	}
 	Coords []struct {
-		Type    string
-		Search  string
-		Replace string
+		Type   string
+		Search string
 	}
 }
 
@@ -48,12 +46,10 @@ func (c *Config) applyReplacers() {
 		for j := range p.Times {
 			t := &p.Times[j]
 			t.Search = replacer.Replace(t.Search)
-			t.Replace = replacer.Replace(t.Replace)
 		}
 		for j := range p.Coords {
 			c := &p.Coords[j]
 			c.Search = replacer.Replace(c.Search)
-			c.Replace = replacer.Replace(c.Replace)
 		}
 	}
 }

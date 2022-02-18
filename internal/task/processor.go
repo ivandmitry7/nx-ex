@@ -20,14 +20,12 @@ func NewProcessor(cfg *ParserCfg) (Processor, error) {
 }
 
 type reTimes struct {
-	search  *regexp.Regexp
-	replace string
+	search *regexp.Regexp
 }
 
 type reCoords struct {
-	kind    string
-	search  *regexp.Regexp
-	replace string
+	kind   string
+	search *regexp.Regexp
 }
 
 type ReProc struct {
@@ -55,7 +53,7 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 		if err != nil {
 			return err
 		}
-		p.times = append(p.times, reTimes{re, ts.Replace})
+		p.times = append(p.times, reTimes{re})
 	}
 
 	for _, cs := range cfg.Coords {
@@ -63,7 +61,7 @@ func (p *ReProc) Compile(cfg *ParserCfg) error {
 		if err != nil {
 			return err
 		}
-		p.coords = append(p.coords, reCoords{cs.Type, re, cs.Replace})
+		p.coords = append(p.coords, reCoords{cs.Type, re})
 	}
 	return nil
 }
@@ -93,7 +91,7 @@ func (p ReProc) Parse(msg string) (*parser.Result, error) {
 
 	var timeError error = nil
 	for _, t := range p.times {
-		ts, err := parser.ParseDateTime(msg, t.search, t.replace)
+		ts, err := parser.ParseDateTime(msg, t.search)
 		if err == nil {
 			res.Date = ts
 			break
@@ -107,7 +105,7 @@ func (p ReProc) Parse(msg string) (*parser.Result, error) {
 
 	var coordError error = nil
 	for _, c := range p.coords {
-		a, err := parser.ParseCoords(msg, c.kind, c.search, c.replace)
+		a, err := parser.ParseCoords(msg, c.kind, c.search)
 		if err == nil {
 			res.Area = a
 			break

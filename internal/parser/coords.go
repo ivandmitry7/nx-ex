@@ -163,7 +163,7 @@ func parsePolygons(cstr string) (area []Area, e error) {
 	return
 }
 
-func ParseCoords(msg string, kind string, re *regexp.Regexp, template string) (area []Area, err error) {
+func ParseCoords(msg string, kind string, re *regexp.Regexp) (area []Area, err error) {
 	m := re.FindAllStringSubmatch(msg, -1)
 	if m == nil {
 		err = errors.New("unable to match coords pattern")
