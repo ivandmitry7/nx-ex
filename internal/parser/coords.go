@@ -41,47 +41,44 @@ func stringToCoord(cs string) (coord float32, e error) {
 	return
 }
 
-func parseCircle(template string, values []string) (area []Area, e error) {
-	cs, err := TemplateToString(template, values)
-	if err != nil {
-		e = err
-		return
-	}
-	re, err := regexp.Compile(`(\d+)([CBK])r(\d+)-(\d+)(?:[.,](\d+))?\s?([NS])\s+(\d+)-(\d+)(?:[.,](\d+))?\s?([EW])`)
-	if err != nil {
-		e = err
-		return
-	}
-
-	m := re.FindAllStringSubmatch(cs, -1)
-	if m == nil {
-		e = errors.New("unable to match circle coords pattern")
-		return
-	}
-	if len(m[0]) < 2 {
-		e = errors.New("invalid results of circle coords matching")
-		return
+func parseCircle(names []string, values []string) (area []Area, err error) {
+	groups := make(map[string]string)
+	for i, name := range names {
+		if i != 0 {
+			groups[name] = values[i]
+		}
 	}
 
 	var radius float32
-	ri, _ := strconv.Atoi(m[0][1])
+	ri, e := strconv.Atoi(groups["r"])
+	if e != nil {
+		err = e
+		return
+	}
 	radius = float32(ri) * 1852.0
-	if m[0][2] == "C" {
+	if groups["t"] == "C" {
 		radius /= 10.0
 	}
 
+	re := regexp.MustCompile(`(\d+)-(\d+)(?:[.,](\d+))?\s?([NSEW])`)
+	mx := re.FindAllStringSubmatch(groups["x"], -1)
+	my := re.FindAllStringSubmatch(groups["y"], -1)
+	if mx == nil || my == nil || len(mx[0]) < 2 || len(my[0]) < 2 {
+		err = errors.New("unable to match circle coords pattern")
+		return
+	}
+
 	coords := Coords{
-		Lat: coordsToFloat(m[0][3], m[0][4], m[0][5], m[0][6]),
-		Lon: coordsToFloat(m[0][7], m[0][8], m[0][9], m[0][10]),
+		Lat: coordsToFloat(mx[0][1], mx[0][2], mx[0][3], mx[0][4]),
+		Lon: coordsToFloat(my[0][1], my[0][2], my[0][3], my[0][4]),
 	}
 
 	area = []Area{{
 		Type:   "circle",
 		Radius: radius,
 		Coords: []Coords{coords},
-		Raw:    cs,
+		Raw:    fmt.Sprintf("%s%s %s %s", groups["r"], groups["t"], groups["x"], groups["y"]),
 	}}
-
 	return
 }
 
@@ -179,7 +176,7 @@ func ParseCoords(msg string, kind string, re *regexp.Regexp, template string) (a
 
 	switch kind {
 	case "circle":
-		area, err = parseCircle(template, m[0])
+		area, err = parseCircle(re.SubexpNames(), m[0])
 	case "polygon":
 		area, err = parsePolygon(m[0][1])
 	case "polygons":

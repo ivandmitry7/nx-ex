@@ -1,6 +1,6 @@
 ######################################################### 
 # Custom meta sequences
-# \_   (?:\s|\r?\n)
+# \_   [\s|\n]
 # \M   JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC
 ######################################################### 
 replacers:
@@ -12,13 +12,7 @@ replacers:
     replace: '>JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)'
   -
     search: [\_]
-    replace: '[\s\r]'
-  - 
-    search: [\n]
-    replace: \r?\n
-  - 
-    search: [\$]
-    replace: \r?$
+    replace: '[\s\n]'
 parsers:
   - # Common
     name: Common
@@ -29,39 +23,36 @@ parsers:
       # PET NAV WARN 016/22
       # EASTERN GULF OF FINLAND
       # SHIPS EXERCISES 17 THRU 22 JAN 0500 TO 1600 UTC
-      search: '[A-Z]+ NAV WARN \d+/(\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+(?:\s\n)?\s?(\d+)(?:\sTHRU\s|\s?-\s?)(\d+) (JAN) (\d+)(\d\d)(?:\sTO\s|-)(\d+)(\d\d) UTC'
-      replace: 20${1}-${4}-${2}T${5}:${6}:00Z;20${1}-${4}-${3}T${7}:${8}:00Z
-    -
-      # LIT NAV WARN 002/22
-      # SOUTH-EASTERN BALTIC
-      # LIT COAST
-      # MILITARY EXERCISES
-      # 162200-232200 UTC JAN
-      search: '[A-Z]+ NAV WARN \d+/(\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+(?:\s|\n)(\d\d)(\d\d)(\d\d)-(\d\d)(\d\d)(\d\d) UTC (JAN)'
-      replace: 20${1}-${8}-${2}T${3}:${4}:00Z;20${1}-${8}-${5}T${6}:${7}:00Z
+      search: '[A-Z]+ NAV WARN \d+/(?P<y0>\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+(?:\s\n)?\s?(?P<d0>\d+)(?:\sTHRU\s|\s?-\s?)(?P<d1>\d+) (?P<m1>JAN) (?P<h0>\d+)(?P<n0>\d\d)(?:\sTO\s|-)(?P<h1>\d+)(?P<n1>\d\d) UTC'
     -
       # PET NAV WARN 036/22.
       # EASTERN GULF OF FINLAND.
       # SHIPS EXERCISES 
       # 31 JAN THRU 05 FEB 0500 TO 1600 UTC
       # IN AREA TEMP DANGEROUS TO SHIPPING
-      search: '[A-Z]+ NAV WARN \d+/(\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+(?:\s|\s?\n)(\d+) (JAN) THRU (\d+) (FEB) (\d+)(\d\d) TO (\d+)(\d\d) UTC'
-      replace: 20${1}-${3}-${2}T${6}:${7}:00Z;20${1}-${5}-${4}T${7}:${8}:00Z
+      search: '[A-Z]+ NAV WARN \d+/(?P<y0>\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+\_+(?P<d0>\d+) (?P<m0>JAN) THRU (?P<d1>\d+) (?P<m1>FEB) (?P<h0>\d+)(?P<n0>\d\d) TO (?P<h1>\d+)(?P<n1>\d\d) UTC'
+    -
+      # LIT NAV WARN 002/22
+      # SOUTH-EASTERN BALTIC
+      # LIT COAST
+      # MILITARY EXERCISES
+      # 162200-232200 UTC JAN
+      search: '[A-Z]+ NAV WARN \d+/(?P<y0>\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+\_+(?P<d0>\d\d)(?P<h0>\d\d)(?P<n0>\d\d)-(?P<d1>\d\d)(?P<h1>\d\d)(?P<n1>\d\d) UTC (?P<m0>JAN)'
     -
       # LITHUANIAN NAV WARN 004/22
       # SOUTH-EASTERN BALTIC. LITHUANIAN COAST. 
       # MILITARY EXERCISES 1 FEB 0700-1500 UTC
       # IN AREA EYD-17 BOUNDED BY:
-      search: '[A-Z]+ NAV WARN \d+/(\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+(?:\s|\s?\n)(\d+) (JAN) (\d\d)(\d\d)-(\d\d)(\d\d) UTC'
-      replace: 20${1}-${3}-${2}T${4}:${5}:00Z;20${1}-${3}-${2}T${6}:${7}:00Z
+      # search: '[A-Z]+ NAV WARN \d+/(\d\d)\.?\n(?:.*\n)+(?:\s+)?\w+ \w+(?:\s|\s?\n)(\d+) (JAN) (\d\d)(\d\d)-(\d\d)(\d\d) UTC'
+      # replace: 20${1}-${3}-${2}T${4}:${5}:00Z;20${1}-${3}-${2}T${6}:${7}:00Z
+      search: '[A-Z]+ NAV WARN \d+/(?P<y0>\d\d)\.?\n(?:.*\n)+\s*\w+ \w+\_+(?P<d0>\d+) (?P<m0>FEB) (?P<h0>\d\d)(?P<n0>\d\d)-(?P<h1>\d\d)(?P<n1>\d\d) UTC'
     -
       # LITHUANIAN NAV WARN 003/22
       # SOUTH-EASTERN BALTIC. LITHUANIAN COAST - MILITARY EXERCISES
       # MILITARY EXERCISES 250800 TO 251400 UTC JAN
       # AND 260800 TO 261400 UTC JAN
       # IN AREA EYD-17 BOUNDED BY:
-      search: '(?s)[A-Z]+ NAV WARN \d\d\d\/(\d\d)\n(?:.*\n)\w+ \w+ (\d\d)(\d\d)(\d\d) TO \d\d\d\d\d\d UTC (JAN).*TO (\d\d)(\d\d)(\d\d) UTC (JAN)'
-      replace: 20${1}-${5}-${2}T${3}:${4}:00Z;20${1}-${9}-${6}T${7}:${8}:00Z
+      search: '(?s)[A-Z]+ NAV WARN \d+/(?P<y0>\d\d)\n(?:.*\n)\w+ \w+ (?P<d0>\d\d)(?P<h0>\d\d)(?P<n0>\d\d).+UTC (?P<m0>JAN).+TO (?P<d1>\d\d)(?P<h1>\d\d)(?P<n1>\d\d) UTC (?P<m1>JAN)'
     coords: 
     - 
       # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
@@ -88,8 +79,7 @@ parsers:
       # KR-105 CENTERED IN 60-06N 029-08E
       # CANCEL THIS MSG 291700 UTC JAN
       type: circle
-      search: DANGEROUS TO SHIPPING(?:\s|\n)([B|K])R-(\d+)\s(?:\n)?CENTERED (?:IN )?(\d+-\d+(?:[\.,]\d+)?[NS]) 0(\d+-\d+(?:[\.,]\d+)?[EW])\.?\nCANCEL
-      replace: ${2}${1}r${3} ${4}
+      search: DANGEROUS TO SHIPPING\_(?P<t>[B|K])R-(?P<r>\d+)\_+CENTERED (?:IN )?(?P<x>\d+-\d+(?:[\.,]\d+)?[NS]) 0(?P<y>\d+-\d+(?:[\.,]\d+)?[EW])\.?\nCANCEL
 
   - # ODESA-NAVTEX
     name: ODESA-NAVTEX
@@ -113,12 +103,11 @@ parsers:
       # 46-11.46N 030-59.93E
       # 2. CANCEL THIS MSG 
       type: polygon
-      search: AREA BOUNDED BY\r?\n((?:\d\d-\d\d(?:[\.-]\d+)?\s?[NS]\s+0?\d\d-\d\d(?:[\.-]\d+)?\s?[EW]( AND COASTLINE)?\r?\n)+)2. CANCEL
+      search: AREA BOUNDED BY\n((?:\d\d-\d\d(?:[\.-]\d+)?\s?[NS]\s+0?\d\d-\d\d(?:[\.-]\d+)?\s?[EW]( AND COASTLINE)?\n)+)2. CANCEL
     - 
       # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
       type: circle
-      search: (?m)^WITHIN (\d\d) CABLES OF (\d\d-\d\d.\d)\s?([NS])\s+(0\d\d-\d\d.\d\d)\s?([EW])\r?$
-      replace: ${1}Cr${2}${3} ${4}${5}
+      search: (?m)^WITHIN (?P<r>\d+) (?P<t>C)ABLES OF (?P<x>\d\d-\d\d.\d\s?[NS])\s+(?P<y>0\d\d-\d\d.\d\d\s?[EW])$
     - 
       # AREAS BOUNDED BY
       # A. 45-44.5N 031-33.0E
@@ -127,7 +116,7 @@ parsers:
       #    45-24.0N 032-00.0E
       # 2. CANCEL THIS MSG 
       type: polygons
-      search: AREAS BOUNDED BY\r?\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\r?\n)+)2. CANCEL
+      search: AREAS BOUNDED BY\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\n)+)2. CANCEL
 
   - # NOVOROSSIYSK
     name: NOVOROSSIYSK
@@ -150,7 +139,7 @@ parsers:
       # 035-50.0E 45-00.0N 035-50.0E AND COASTLINE
       # 2. CANCEL THIS MESSAGE 311800 UTC JAN 22
       type: polygon
-      search: AREA BOUNDED BY(?:\s|\r\n)?((?:\d+-\d+(?:.\d)?[NSEW](?:\s|\r\n)?)+)(?:\sAND COASTLINE)?\r?\n2. CANCEL
+      search: (?s)AREA BOUNDED BY\_?((?:\d+-\d+(?:.\d)?[NSEW]\_?)+)(?:\_AND COASTLINE)?\n2. CANCEL
     -
       # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 0400
       # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROCS IN AREAS BOUNDED BY
@@ -160,5 +149,5 @@ parsers:
       # 44-43.5N 037-15.8E
       # 2. CANCEL THIS MESSAGE 151900 UTC JAN 22
       type: polygons
-      search: (?s)AREAS BOUNDED BY((?:\r?\n(?:[A-Z]\.(?:(?:\s|\r?\n)\d+-\d+\.\d+\s?[NSEW])+))+)\r?\n2\. CANCEL
+      search: (?s)AREAS BOUNDED BY((?:\n(?:[A-Z]\.(?:[\s\n]\d+-\d+\.\d+\s?[NSEW])+))+)\n2\. CANCEL
 
