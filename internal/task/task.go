@@ -17,6 +17,7 @@ type Task struct {
 	opt struct {
 		verbose bool
 		quiet   bool
+		outDir  string
 	}
 	processors []Processor
 	stats      map[string]int
@@ -58,6 +59,10 @@ func (t *Task) Execute(opts map[string]interface{}) error {
 		return nil
 	}
 	t.cfg = cfg
+	t.opt.outDir = opts["--out-dir"].(string)
+	if t.opt.outDir == `""` {
+		t.opt.outDir = ""
+	}
 	t.opt.verbose = opts["--verbose"].(bool)
 	t.opt.quiet = opts["--quiet"].(bool)
 	if t.opt.quiet {
@@ -129,6 +134,13 @@ func normalizeCRLF(str string) string {
 	return strings.ReplaceAll(str, "\r", "\n")
 }
 
+func makeOutName(filename string, outDir string) string {
+	if outDir != "" {
+		filename = filepath.Join(outDir, filepath.Base(filename))
+	}
+	return filename + ".json"
+}
+
 func (t *Task) processFile(filename string) error {
 	if !t.opt.quiet {
 		fmt.Printf("Process file %q... ", filename)
@@ -150,7 +162,7 @@ func (t *Task) processFile(filename string) error {
 			if err == nil {
 				r.Commit()
 				file, _ := json.MarshalIndent(r, "", "\t")
-				jfn := filename + ".json"
+				jfn := makeOutName(filename, t.opt.outDir)
 				if err := ioutil.WriteFile(jfn, file, 0644); err != nil {
 					fmt.Printf("unable to write result to file %q\n", jfn)
 					return err

@@ -10,7 +10,7 @@ import (
 func main() {
 	usage := `NAVTEX alert exercise messages extractor.
 Usage:
-  nxex [-vqr] [--config=NAME] [--out-dir=DIR] [--out-fmt=FMT] <MASK>
+  nxex [-vq] [--config=NAME] [--out-dir=DIR] <MASK>
   nxex --version
   nxex -h | --help
 Arguments:
@@ -20,10 +20,8 @@ Options:
   --version              show version and exit
   -v --verbose           print extra process messages
   -q --quiet             report minimal info
-  -r --recursive         recursive process nested directories
   -c NAME --config=NAME  config file name with parsing rules [default: ./nxex.yml]
-  --out-dir=DIR          dir for save JSON results [default: ./]
-  --out-fmt=FMT          template for out JSON file name [default: *+.json]`
+  --out-dir=DIR          dir for save JSON results [default: ""]`
 
 	arguments, _ := docopt.ParseArgs(usage, nil, "0.0.1")
 	tsk := task.NewTask()
