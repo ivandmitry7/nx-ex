@@ -72,7 +72,7 @@ parsers:
       # 55-33.98N 020-41.88E.
       # AREA TEMP DANGEROUS TO SHIPPING.
       type: polygon
-      search: IN AREA .* BOUNDED BY:?\n((?:\d+-\d+\.\d+[NSEW](?:\s|\s?\.?\n))+)AREA
+      search: IN AREA .* BOUNDED BY:?\n((?:\d+-\d+[\.,]\d+[NSEW](?:\s|\s?\.?\n))+)AREA
     -
       # SHIPS EXERCISES 24-29 JAN 0500-600 UTC
       # IN AREA TEMPORARILY DANGEROUS TO SHIPPING
@@ -88,7 +88,7 @@ parsers:
     times:
     - 
       # 312100 UTC JAN THRU 282100 UTC FEB 21
-      search: 1.\s.+\n(?:FROM )?(?P<d0>\d\d)(?P<h0>\d\d)(?P<n0>\d\d)(?:\sUTC\s?)?\s?(?P<m0>DEC)?\s(?P<y0>\d+)?\s?\n?THRU (?P<d1>\d\d)(?P<h1>\d\d)(?P<n1>\d\d)\s+UTC (?P<m1>JAN) (?P<y1>\d+)
+      search: 1.\s(?:.+\n)+(?:FROM )?(?P<d0>\d\d)(?P<h0>\d\d)(?P<n0>\d\d)(?:\sUTC\s?)?\s?(?P<m0>DEC)?\s(?P<y0>\d+)?\s?\n?(?:THRU|TO) (?P<d1>\d\d)(?P<h1>\d\d)(?P<n1>\d\d)\s+UTC (?P<m1>FEB) (?P<y1>\d+)
     - 
       # 27-29 JAN, 03-05 FEB, 10-12 FEB 22\nFROM 0600 TO 1600 UTC
       search: (?s)1.\s.+\n(?P<d0>\d+).*? (?P<m0>JAN)?.*\D(?P<d1>\d+) (?P<m1>FEB) (?P<y0>\d+).*FROM (?P<h0>\d\d)(?P<n0>\d\d) TO (?P<h1>\d\d)(?P<n1>\d\d)
@@ -103,7 +103,7 @@ parsers:
       # 46-11.46N 030-59.93E
       # 2. CANCEL THIS MSG 
       type: polygon
-      search: AREA BOUNDED BY\n((?:\d\d-\d\d(?:[\.-]\d+)?\s?[NS]\s+0?\d\d-\d\d(?:[\.-]\d+)?\s?[EW]( AND COASTLINE)?\n)+)2. CANCEL
+      search: AREA BOUNDED BY\s?\n((?:\d\d-\d\d(?:[\.-]\d+)?\s?[NS]\s+0?\d\d-\d\d(?:[\.-]\d+)?\s?[EW]( AND COASTLINE)?\s*\n)+)2.\s
     - 
       # WITHIN 10 CABLES OF 45-01.8 N  033-30.53 E
       type: circle
@@ -116,12 +116,12 @@ parsers:
       #    45-24.0N 032-00.0E
       # 2. CANCEL THIS MSG 
       type: polygons
-      search: AREAS BOUNDED BY\n(((?:[A-Z])?.\s+\d\d-\d\d.\d+\s?[NS]\s+0?\d\d-\d\d.\d+\s?[EW]\n)+)2. CANCEL
+      search: AREA[S]? BOUNDED BY\n((?:(?:[A-Z])?.\s+\d\d[-\s]\d\d.\d+\s?[NS]\s+0?\d\d[-\s]\d\d.\d+\s?[EW](?:\sAND COASTLINE)?\n)+)2.\s
 
   - # NOVOROSSIYSK
     name: NOVOROSSIYSK
     source: (?m)^.*(NOVOROSSIYSK) \d+?$
-    reason: (?m)^1. (\w+ \w+) \d.*$
+    reason: (?m)^1. (.*?) (?:\d|FROM).*$
     times: 
     - 
       # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 1400
@@ -132,6 +132,11 @@ parsers:
     - 
       # 1. NAVAL TRAINING 01 THRU 31 JAN 22 FROM 0500 TO 1700 UTC DAILY
       search: (?s)1. \D+ (?P<d0>\d+).*\_(?P<d1>\d+)\_(?P<m0>JAN)\_(?P<y0>\d+)\_FROM\_(?P<h0>\d\d)(?P<n0>\d\d)\_TO\_(?P<h1>\d\d)(?P<n1>\d\d)\_UTC
+    -  
+      # 1. NAVAL TRAINING MISSILE AND GUNNERY FIRING EXERCISES FROM 132100 
+      # THRU 192100 UTC FEB 22 NAVIGATION TEMPORARILY DANGEROUS IN AREAS
+      # BOUNDED BY
+      search: (?s)1. \D+ FROM (?P<d0>\d\d)(?P<h0>\d\d)(?P<n0>\d\d)[\s\n](?:UTC)? (?P<m0>FEB)\s?THRU (?P<d1>\d\d)(?P<h1>\d\d)(?P<n1>\d\d) UTC (?P<m1>FEB) (?P<y0>\d\d)\s
     coords: 
     - 
       # EXCEPT SUNDAYS NAVIGATION TEMPORARILY DANGEROUS IN AREA BOUNDED BY
@@ -139,7 +144,7 @@ parsers:
       # 035-50.0E 45-00.0N 035-50.0E AND COASTLINE
       # 2. CANCEL THIS MESSAGE 311800 UTC JAN 22
       type: polygon
-      search: (?s)AREA BOUNDED BY\_?((?:\d+-\d+(?:.\d)?[NSEW]\_?)+)(?:\_AND COASTLINE)?\n2. CANCEL
+      search: (?s)AREA BOUNDED BY[\s\n]?((?:\d+-\d+(?:.\d)?[NSEW][\s\n]?)+)(?:[\s\n]AND COASTLINE)?\n2.\s
     -
       # 1. NAVAL TRAINING 27 AND 28 DEC 21 AND 10 THRU 15 JAN 22 FROM 0400
       # TO 1800 UTC NAVIGATION TEMPORARILY DANGEROCS IN AREAS BOUNDED BY
@@ -149,5 +154,5 @@ parsers:
       # 44-43.5N 037-15.8E
       # 2. CANCEL THIS MESSAGE 151900 UTC JAN 22
       type: polygons
-      search: (?s)AREAS BOUNDED BY((?:\n(?:[A-Z]\.(?:[\s\n]\d+-\d+\.\d+\s?[NSEW])+))+)\n2\. CANCEL
+      search: (?s)AREAS BOUNDED BY[\s\n]((?:[A-Z]\.[\s\n](?:\d+-\d+(?:\.\d+)?\s?[NSEW][\s\n])+)+)(?:AND COASTLINE)?\n?2\.\s
 
